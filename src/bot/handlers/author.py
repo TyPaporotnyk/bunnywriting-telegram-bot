@@ -2,9 +2,8 @@ from aiogram import F, Router, types
 from aiogram.filters import Command, CommandStart
 from loguru import logger
 
-from src.bot.filters.user import IsAuthor
 from src.bot.filters.admin import IsAdmin
-
+from src.bot.filters.user import IsAuthor
 from src.db.services.admin import get_admin_authors
 
 router = Router(name="commands")

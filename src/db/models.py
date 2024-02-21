@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, func, Table
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Table, func
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -16,10 +16,10 @@ class Base(DeclarativeBase):
 
 
 authors_specialties = Table(
-    'authors_specialties',
+    "authors_specialties",
     Base.metadata,
-    Column('author_id', BigInteger, ForeignKey('author.id')),
-    Column('speciality_id', BigInteger, ForeignKey('speciality.id')),
+    Column("author_id", BigInteger, ForeignKey("author.id")),
+    Column("speciality_id", BigInteger, ForeignKey("speciality.id")),
 )
 
 
@@ -56,7 +56,7 @@ class Speciality(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    authors = relationship('Author', secondary=authors_specialties, back_populates='specialities')
+    authors = relationship("Author", secondary=authors_specialties, back_populates="specialities")
 
 
 class Admin(Base):
@@ -87,6 +87,6 @@ class Author(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    specialities = relationship('Speciality', secondary=authors_specialties, back_populates='authors')
+    specialities = relationship("Speciality", secondary=authors_specialties, back_populates="authors")
     leads = relationship("Lead", back_populates="author")
     admin = relationship("Admin", back_populates="authors")

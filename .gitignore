@@ -326,17 +326,4 @@ tags
 # Redis dump file
 dump.rdb
 
-.pytest_cache/
-
-.idea
-media
-postgres
-sion
-*.sqlite
-*.sqlite3
-
-config/static/*
-
-videos
-webpack_bundlers
-webpack-stats.json
+data/token.json

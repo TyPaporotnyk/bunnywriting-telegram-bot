@@ -1,9 +1,9 @@
 from aiogram import Dispatcher
 from loguru import logger
 
-from .base import router as base_router
-from .author import router as author_router
 from .admin import router as admin_router
+from .author import router as author_router
+from .base import router as base_router
 
 
 def setup(dp: Dispatcher):

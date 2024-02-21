@@ -17,6 +17,3 @@ async def get_author_by_telegram_id(session: AsyncSession, telegram_id: int) -> 
 
     author = await author_repository.get(id=telegram_id)
     return author
-
-
-
