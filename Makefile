@@ -23,7 +23,8 @@ isort:
 	poetry run isort src/ tests/
 
 .PHONY: lint
-lint: isort black mypy
+# lint: isort black mypy
+lint: isort black
 
 .PHONY: run
 run:

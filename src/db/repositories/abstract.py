@@ -30,7 +30,7 @@ class Repository(ABC):
         stmt = select(self.model).filter_by(**filter_by)
         try:
             res = await self.session.execute(stmt)
-            return res.scalar_one()
+            return res.scalar()
         except NoResultFound:
             return None
 
@@ -38,12 +38,11 @@ class Repository(ABC):
         stmt = select(self.model)
         try:
             res = await self.session.execute(stmt)
-            return res
+            return res.scalars().all()
         except NoResultFound:
             return None
 
-    async def create(self, **data):
-        stmt = insert(self.model).values(**data)
-        res = await self.session.execute(stmt)
+    async def create(self, data):
+        obj = self.model(**data)
+        self.session.add(obj)
         await self.session.commit()
-        return res.inserted_primary_key[0]

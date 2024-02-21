@@ -4,7 +4,7 @@ from src.config import settings
 
 async_engine = create_async_engine(
     settings.ASYNC_DATABASE_URL,
-    echo=True,
+    # echo=True,
 )
 
 session_maker = async_sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
