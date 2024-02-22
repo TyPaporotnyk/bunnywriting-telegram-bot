@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  common:
+    build:
+      context: ./
+      dockerfile: buildfiles/Dockerfile
+    volumes:
+      - ./data/:/app/data/
+    env_file:
+      - .env
+    restart: on-failure
+
+  bot:
+    extends:
+      service: common
+    command: poetry run python -m src.bot
+    depends_on:
+      - redis
+
+  celery:
+    extends:
+      service: common
+    command: poetry run celery -A src.worker worker -l INFO
+    depends_on:
+      - redis
+
+  celery-beat:
+    extends:
+      service: common
+    command: poetry run celery -A src.worker beat -l INFO
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:6-alpine
+    restart: on-failure
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
