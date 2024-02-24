@@ -12,8 +12,15 @@ async def create_base_author(session: AsyncSession, author_data: dict):
     await author_repository.create(author_data)
 
 
-async def get_author_by_telegram_id(session: AsyncSession, telegram_id: int) -> Optional[Author]:
+async def get_author_by_telegram_id(session: AsyncSession, author_id: int) -> Optional[Author]:
     author_repository = AuthorRepository(session)
 
-    author = await author_repository.get(id=telegram_id)
+    author = await author_repository.get(id=author_id)
     return author
+
+
+async def get_author_leads(session, author_id):
+    author_repository = AuthorRepository(session)
+    author = await author_repository.get(id=author_id)
+
+    return author.leads

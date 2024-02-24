@@ -33,8 +33,8 @@ class Lead(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    status = relationship("LeadStatus", back_populates="leads")
-    author = relationship("Author", back_populates="leads")
+    status = relationship("LeadStatus", back_populates="leads", lazy="selectin")
+    author = relationship("Author", back_populates="leads", lazy="selectin")
 
 
 class LeadStatus(Base):
@@ -45,7 +45,7 @@ class LeadStatus(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    leads = relationship("Lead", back_populates="status")
+    leads = relationship("Lead", back_populates="status", lazy="selectin")
 
 
 class Speciality(Base):
@@ -56,7 +56,7 @@ class Speciality(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    authors = relationship("Author", secondary=authors_specialties, back_populates="specialities")
+    authors = relationship("Author", secondary=authors_specialties, back_populates="specialities", lazy="selectin")
 
 
 class Admin(Base):
@@ -88,5 +88,5 @@ class Author(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     specialities = relationship("Speciality", secondary=authors_specialties, back_populates="authors")
-    leads = relationship("Lead", back_populates="author")
-    admin = relationship("Admin", back_populates="authors")
+    leads = relationship("Lead", back_populates="author", lazy="selectin")
+    admin = relationship("Admin", back_populates="authors", lazy="selectin")

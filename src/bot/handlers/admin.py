@@ -6,7 +6,9 @@ from loguru import logger
 from src.bot.filters.admin import IsAdmin
 from src.bot.keyboards.admin import get_start_keyboard
 from src.bot.states.admin import MailingFormState, UserFormState
-from src.db.services.admin import get_admin_author_ids
+from src.crm.author import Author
+from src.crm.exceptions import AuthorNotCreated
+from src.db.services.admin import get_admin_author_deadlines, get_admin_author_ids, get_admin_author_payments
 from src.db.services.user import create_base_author
 from src.worker import send_user_messages_task
 
@@ -29,12 +31,21 @@ async def add_author(callback: types.CallbackQuery, state: FSMContext):
 @router.message(UserFormState.user_data)
 async def get_author_name(message: types.Message, state: FSMContext, session):
     admin_id = message.from_user.id
-    telegram_id, author_id, full_name, raiting = list(map(str.strip, message.text.split(",")))
-    await create_base_author(
-        session, {"id": telegram_id, "full_name": full_name, "raiting": raiting, "admin_id": admin_id}
-    )
 
-    await message.answer("Автор був доданий")
+    try:
+        telegram_id, author_id, full_name, raiting = list(map(str.strip, message.text.split(",")))
+
+        await Author.create_author(telegram_id, author_id, full_name, raiting, admin_id)
+        await create_base_author(
+            session, {"id": telegram_id, "full_name": full_name, "raiting": raiting, "admin_id": admin_id}
+        )
+
+        await message.answer("✅Автор був доданий")
+    except AuthorNotCreated:
+        await message.answer("❌Автор не був доданий")
+    except Exception as e:
+        await message.answer("❌Автор не був доданий")
+        logger.error(f"Author has not been created by not raized error: {repr(e)}")
 
     await state.clear()
 
@@ -60,8 +71,22 @@ async def admin_mailing_message(message: types.Message, state: FSMContext, sessi
             send_user_messages_task.delay(authors_ids, send_message)
         except Exception as e:
             logger.error(f"Send user messages task has not been created successfully: {repr(e)}")
-            await message.answer("Сталася помилка при створенні завдання на розсилку")
+            await message.answer("❌Сталася помилка при створенні завдання на розсилку")
         else:
-            await message.answer("Завдання щодо розсилки повідомлень було успішно створено")
+            await message.answer("✅Завдання розсилки повідомлень було успішно створено")
 
     await state.clear()
+
+
+@router.callback_query(F.data == "author_payments", IsAdmin())
+async def author_payments(callback: types.CallbackQuery, state: FSMContext, session):
+    # admin_id = callback.from_user.id
+    # author_payments = await get_admin_author_payments(session, admin_id)
+    pass
+
+
+@router.callback_query(F.data == "author_deadlines", IsAdmin())
+async def author_deadlines(callback: types.CallbackQuery, state: FSMContext, session):
+    # admin_id = callback.from_user.id
+    # author_deadlines = await get_admin_author_deadlines(session, admin_id)
+    pass

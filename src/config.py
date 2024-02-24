@@ -10,6 +10,11 @@ class Settings(BaseSettings):
 
     TELEGRAM_BOT_TOKEN: str
 
+    KOMMO_SECRET_KEY: str
+    KOMMO_INTEGRATION_ID: str
+    KOMMO_REDIRECT_URL: str
+    KOMMO_URL_BASE: str
+
     REDIS_HOST: str
     REDIS_PORT: str
     REDIS_DB: str
