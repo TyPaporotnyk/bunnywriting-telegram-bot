@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import List
 from urllib.parse import urlencode, urljoin
 
 import httpx
+from loguru import logger
 
 from src.config import settings
 from src.crm.exceptions import AuthorNotCreated, AuthorNotUpdated
 from src.crm.token import Token
+from src.db.schemas import AuthorSchema, SpecialitySchema
 
 
 @dataclass
@@ -13,8 +16,8 @@ class AuthorFieds:
     TELEGRAM_ID = 1110792
     CARD_NUMBER = 1111072
     IS_AUCTION = 1111074
-    TELEGRAM_USERNAME = 1111076
-    AUTHOR_ID = 1111078
+    TELEGRAM_URL = 1111076
+    CUSTOM_ID = 1111078
     POSITION = 254484
     TEAMLEAD_ID = 1110804
     RATING = 1110796
@@ -25,6 +28,43 @@ class AuthorFieds:
     SPECIALITIES = 1110802
     IS_AUTHOR = 1110790
     TERM_OF_USE = 1114546
+
+
+def get_author_from_dict(data: dict):
+    name = data["name"]
+    author_id = data["id"]
+    custom_fields = {}
+    fields = data.get("custom_fields_values", [])
+
+    for field in fields:
+        filed_id = field["field_id"]
+        field_values = field["values"]
+        field_type = field["field_type"]
+
+        if field_type == "multiselect":
+            field_values = [value["value"] for value in field_values]
+        else:
+            field_values = field["values"][0]["value"]
+
+        custom_fields.setdefault(filed_id, field_values)
+
+    return AuthorSchema(
+        name=name,
+        id=author_id,
+        telegram_id=custom_fields.get(AuthorFieds.TELEGRAM_ID),
+        custom_id=custom_fields.get(AuthorFieds.CUSTOM_ID),
+        raiting=custom_fields.get(AuthorFieds.RATING),
+        admin_id=custom_fields.get(AuthorFieds.TEAMLEAD_ID),
+        plane_bussyness=custom_fields.get(AuthorFieds.PLANE_BUSINESS),
+        bussynes=custom_fields.get(AuthorFieds.BUSINESSS),
+        open_leads=custom_fields.get(AuthorFieds.OPEN_LEADS),
+        auction=custom_fields.get(AuthorFieds.IS_AUCTION),
+        card_number=custom_fields.get(AuthorFieds.CARD_NUMBER),
+        telegram_url=custom_fields.get(AuthorFieds.TELEGRAM_URL),
+        specialities=[
+            SpecialitySchema(name=speciality) for speciality in custom_fields.get(AuthorFieds.SPECIALITIES, [])
+        ],
+    )
 
 
 class Author:
@@ -43,7 +83,7 @@ class Author:
     @classmethod
     async def _make_update_request(cls, author_id, json_data):
         async with httpx.AsyncClient() as client:
-            response = await client.post(
+            response = await client.patch(
                 cls._get_api_url() + "/" + str(author_id),
                 headers=(await cls._get_header()),
                 json=json_data,
@@ -76,10 +116,10 @@ class Author:
                 headers=(await cls._get_header()),
             )
 
-        return response.json()
+        return get_author_from_dict(response.json())
 
     @classmethod
-    async def get_authors(cls, page):
+    async def get_authors(cls, page: int = 0) -> List[AuthorSchema]:
         """Получает все аторов"""
         params = {"query": "True", "limit": "250", "page": page}
 
@@ -92,7 +132,7 @@ class Author:
         if response.status_code != 200:
             raise AuthorNotCreated()
 
-        return response.json()
+        return [get_author_from_dict(author) for author in response.json()["_embedded"]["contacts"]]
 
     @classmethod
     async def create_author(cls, telegram_id, user_id, full_name, raiting, team_lead) -> bool:
@@ -105,7 +145,7 @@ class Author:
                 "custom_fields_values": [
                     {"field_id": AuthorFieds.TELEGRAM_ID, "values": [{"value": str(telegram_id)}]},
                     {"field_id": AuthorFieds.RATING, "values": [{"value": raiting}]},
-                    {"field_id": AuthorFieds.AUTHOR_ID, "values": [{"value": str(user_id)}]},
+                    {"field_id": AuthorFieds.CUSTOM_ID, "values": [{"value": str(user_id)}]},
                     {"field_id": AuthorFieds.TEAMLEAD_ID, "values": [{"value": str(team_lead)}]},
                     {"field_id": AuthorFieds.PLANE_BUSINESS, "values": [{"value": 0}]},
                     {"field_id": AuthorFieds.BUSINESSS, "values": [{"value": 0}]},
@@ -128,7 +168,7 @@ class Author:
                     "values": [{"value": speciality} for speciality in specialities],
                 },
                 {"field_id": AuthorFieds.CARD_NUMBER, "values": [{"value": card_number}]},
-                {"field_id": AuthorFieds.TELEGRAM_USERNAME, "values": [{"value": username}]},
+                {"field_id": AuthorFieds.TELEGRAM_URL, "values": [{"value": username}]},
             ]
         }
 

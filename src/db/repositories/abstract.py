@@ -45,4 +45,4 @@ class Repository(ABC):
     async def create(self, data):
         obj = self.model(**data)
         self.session.add(obj)
-        await self.session.commit()
+        # await self.session.commit()

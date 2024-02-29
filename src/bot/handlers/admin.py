@@ -8,8 +8,9 @@ from src.bot.keyboards.admin import get_start_keyboard
 from src.bot.states.admin import MailingFormState, UserFormState
 from src.crm.author import Author
 from src.crm.exceptions import AuthorNotCreated
-from src.db.services.admin import get_admin_author_deadlines, get_admin_author_ids, get_admin_author_payments
-from src.db.services.user import create_base_author
+from src.db.services.admin import get_admin_author_ids, get_admin_authors
+from src.db.services.author import create_base_author
+from src.db.services.lead import get_current_author_payments, get_current_author_tasks
 from src.worker import send_user_messages_task
 
 router = Router(name="admin")
@@ -37,7 +38,7 @@ async def get_author_name(message: types.Message, state: FSMContext, session):
 
         await Author.create_author(telegram_id, author_id, full_name, raiting, admin_id)
         await create_base_author(
-            session, {"id": telegram_id, "full_name": full_name, "raiting": raiting, "admin_id": admin_id}
+            session, {"id": telegram_id, "name": full_name, "raiting": raiting, "admin_id": admin_id}
         )
 
         await message.answer("✅Автор був доданий")
@@ -80,13 +81,46 @@ async def admin_mailing_message(message: types.Message, state: FSMContext, sessi
 
 @router.callback_query(F.data == "author_payments", IsAdmin())
 async def author_payments(callback: types.CallbackQuery, state: FSMContext, session):
-    # admin_id = callback.from_user.id
-    # author_payments = await get_admin_author_payments(session, admin_id)
-    pass
+    admin_id = callback.from_user.id
+    authors = await get_admin_authors(session, admin_id)
+
+    if not authors:
+        callback.answer("У вас немає жодного автора")
+        return
+
+    for author in authors:
+        author_payments = await get_current_author_payments(session, author.custom_id)
+
+        if not author_payments:
+            continue
+
+        sale_sum = 0
+        leads_message = f"Автор: {author.custom_id}, {author.name}, {author.card_number}\n"
+        for author_payment in author_payments:
+            sale_sum += author_payment.expenses
+            leads_message += f"{author_payment.id} - {author_payment.expenses}\n"
+
+        leads_message += f"Сума: {sale_sum}\n\n"
+        await callback.message.answer(leads_message)
 
 
 @router.callback_query(F.data == "author_deadlines", IsAdmin())
 async def author_deadlines(callback: types.CallbackQuery, state: FSMContext, session):
-    # admin_id = callback.from_user.id
-    # author_deadlines = await get_admin_author_deadlines(session, admin_id)
-    pass
+    admin_id = callback.from_user.id
+    authors = await get_admin_authors(session, admin_id)
+
+    if not authors:
+        callback.answer("У вас немає жодного автора")
+        return
+
+    for author in authors:
+        author_tasks = await get_current_author_tasks(session, author.custom_id)
+
+        if not author_tasks:
+            continue
+
+        leads_message = f"Автор: {author.custom_id}, {author.name}\n"
+        for author_task in author_tasks:
+            leads_message += f"{author_task.id} - {author_task.deadline_for_author} - {author_task.status}\n"
+
+        await callback.message.answer(leads_message)
