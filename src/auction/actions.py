@@ -110,7 +110,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                 logger.info(f"Author {author.telegram_id} becomes the owner of the project: {lead.id}")
                 break
             elif answer == "refuce":
-                logger.info(f"Author {author.telegram_id} declined participation of the project: {lead.id}")
+                logger.info(f"Author {author.telegram_id} did not respond to the project participation message: {lead.id}")
             else:
                 await send_message(
                     bot,
@@ -143,7 +143,7 @@ async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
 
     # Ждет пока авторы успеют дать свои ответы
     # await asyncio.sleep(1800)
-    await asyncio.sleep(30)
+    await asyncio.sleep(1800)
 
     # Получаем результаты аукциона и отправляем сообщения победителям
     author_rates = await get_lead_answers(lead.id)
