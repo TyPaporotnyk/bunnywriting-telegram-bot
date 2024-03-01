@@ -26,4 +26,4 @@ RUN python -m venv .venv && \
     .venv/bin/pip install poetry==${POETRY_VERSION} && \
     poetry install --no-interaction --no-cache --no-root
 
-COPY .. ./
+COPY . ./
