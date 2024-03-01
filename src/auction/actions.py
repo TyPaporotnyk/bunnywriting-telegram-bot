@@ -107,18 +107,19 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                 await Lead.update_lead_status(lead.id, 53018611)
                 flag = True
 
-                logger.info(f"Author {author.telegram_id} becomes the owner of the project: {lead.id}")
+                logger.info(f"Автор {author.telegram_id} становиться владельцем проекта: {lead.id}")
                 break
             elif answer == "refuce":
-                logger.info(f"Author {author.telegram_id} did not respond to the project participation message: {lead.id}")
+                logger.info(f"Автор {author.telegram_id} отказался от проекта: {lead.id}")
             else:
+                logger.info(f"Автор {author.telegram_id} не отрегировал на проект: {lead.id}")
                 await send_message(
                     bot,
                     author.telegram_id,
                     f"Термін прийому завдання #{lead.id} завершився",
                     keyboard=types.ReplyKeyboardRemove(),
                 )
-
+        
     return (flag, lead)
 
 

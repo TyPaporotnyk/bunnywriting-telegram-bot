@@ -172,13 +172,19 @@ async def get_author_specialities(message: types.Message, state: FSMContext, ses
 @router.callback_query(F.data == "change_busyness", IsAuthor())
 async def change_busyness(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
-        "Вкажи бажане планове навантаження не більше 20",
+        "Вкажи бажане планове навантаження не більше 20. Або 'Вийти' щоб скасувати дію",
         reply_markup=types.ReplyKeyboardRemove(),
     )
     await state.set_state(ChangeBussinessState.get_bussines)
 
 
-@router.message(F.text.func(lambda message: not message.isdigit()), ChangeBussinessState.get_bussines)
+@router.message(F.text.func(lambda s: "вийти" in str(s).lower()), ChangeBussinessState.get_bussines)
+async def test_start(message: types.Message, state: FSMContext):
+    message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
+    await state.clear()
+
+
+@router.message(F.text.func(lambda message: not str(message.isdigit())), ChangeBussinessState.get_bussines)
 async def action_change_busyness(message: types.Message):
     await message.reply("Введіть правильне, ціле число")
 
