@@ -4,7 +4,7 @@ from datetime import datetime, time
 from loguru import logger
 
 from src.auction.find import find_auction_authors, find_private_auction_authors
-
+from src.bot.utils import logging
 
 async def main():
     logger.info("Start auction")
@@ -27,4 +27,8 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    logging.setup()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
