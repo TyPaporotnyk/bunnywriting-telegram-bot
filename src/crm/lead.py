@@ -73,7 +73,7 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         date=custom_fields.get(254738),
         speciality=custom_fields.get(254842),
         work_type=custom_fields.get(254896),
-        koef=custom_fields.get(254898),
+        koef=custom_fields.get(254898, "0"),
         pages=custom_fields.get(254900),
         thema=custom_fields.get(254902),
         uniqueness=custom_fields.get(254904),
