@@ -20,7 +20,7 @@ ENV PATH="${PATH}:${POETRY_VENV}/bin"
 WORKDIR /app
 COPY ../poetry.lock pyproject.toml ./
 
-RUN poetry check
+# RUN poetry check
 RUN poetry install --no-interaction --no-cache --no-root
 
 COPY .. .

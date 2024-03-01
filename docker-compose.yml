@@ -1,4 +1,4 @@
-version: '3.9'
+version: '2.2'
 
 services:
   common:
@@ -13,6 +13,7 @@ services:
 
   bot:
     extends:
+      file: docker-compose.yml
       service: common
     command: poetry run python -m src.bot
     depends_on:
@@ -20,6 +21,7 @@ services:
 
   auction:
     extends:
+      file: docker-compose.yml
       service: common
     command: poetry run python -m src.auction
     depends_on:
@@ -27,6 +29,7 @@ services:
 
   celery:
     extends:
+      file: docker-compose.yml
       service: common
     command: poetry run celery -A src.worker worker -l INFO --beat
     depends_on:
