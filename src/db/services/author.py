@@ -29,12 +29,10 @@ async def get_author_leads(session, author_id):
     return author.leads
 
 
-async def get_not_busyness_authors():
+async def get_not_busyness_authors(speciality) -> List[Author]:
     async with session_maker() as session:
         author_repository = AuthorRepository(session)
-        author = await author_repository.get_not_business()
-
-        return author
+        return await author_repository.get_not_busyness_by_speciality(speciality)
 
 
 async def update_author_specialities(session, author_id, specialities):
@@ -44,9 +42,15 @@ async def update_author_specialities(session, author_id, specialities):
     await author_repository.update_author_specialities(author_id, specialities)
 
 
-async def update_author_busyness(session, author_id, plane_bussyness):
+async def update_author_plane_busyness(session, author_id, plane_busyness):
     author_repository = AuthorRepository(session)
-    await author_repository.update_author_business(author_id, plane_bussyness)
+    await author_repository.update_author_plane_busyness(author_id, plane_busyness)
+
+
+async def update_author_busyness_and_open_leads(author_id, busyness, open_leads):
+    async with session_maker() as session:
+        author_repository = AuthorRepository(session)
+        await author_repository.update_author_busyness_and_open_leads(author_id, busyness, open_leads)
 
 
 async def db_register_author(session, author_id, card_number, specialities, telegram_url):

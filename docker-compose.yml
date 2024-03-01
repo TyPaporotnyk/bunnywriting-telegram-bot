@@ -18,17 +18,17 @@ services:
     depends_on:
       - redis
 
-  celery:
+  action:
     extends:
       service: common
-    command: poetry run celery -A src.worker worker -l INFO
+    command: poetry run python -m src.action
     depends_on:
       - redis
 
-  celery-beat:
+  celery:
     extends:
       service: common
-    command: poetry run celery -A src.worker beat -l INFO
+    command: poetry run celery -A src.worker worker -l INFO --beat
     depends_on:
       - redis
 

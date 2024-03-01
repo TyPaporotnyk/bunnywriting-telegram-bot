@@ -132,6 +132,7 @@ class Lead:
             )
 
         if response.status_code != 200:
+            logger.error(response.text)
             raise LeadNotUpdated()
 
         return response
@@ -220,12 +221,13 @@ class Lead:
         await cls._make_update_request(lead_id, json_data)
 
     @classmethod
-    async def update_lead_author(cls, lead_id, author_crm_id, uthor_teamlead_id) -> bool:
+    async def update_lead_author(cls, lead_id, author_crm_id, author_teamlead_id) -> bool:
         json_data = {
             "custom_fields_values": [
                 {"field_id": 254968, "values": [{"value": str(author_crm_id)}]},
-                {"field_id": 1116279, "values": [{"value": str(author_crm_id)}]},
-                {"field_id": 255084, "values": [{"value": str(uthor_teamlead_id)}]},
+                # {"field_id": 1116279, "values": [{"value": str(author_crm_id)}]},
+                {"field_id": 254968, "values": [{"value": str(author_crm_id)}]},
+                {"field_id": 255084, "values": [{"value": str(author_teamlead_id)}]},
             ]
         }
 

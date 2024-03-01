@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: 55a33e52d5a1
-Revises: 
+Revises:
 Create Date: 2024-02-29 06:46:10.402054
 
 """
@@ -92,10 +92,10 @@ def upgrade() -> None:
         sa.Column("telegram_id", sa.BigInteger(), nullable=True),
         sa.Column("custom_id", sa.BigInteger(), nullable=True),
         sa.Column("name", sa.String(length=256), nullable=True),
-        sa.Column("raiting", sa.Integer(), nullable=True),
+        sa.Column("rating", sa.Integer(), nullable=True),
         sa.Column("admin_id", sa.BigInteger(), nullable=True),
-        sa.Column("plane_bussyness", sa.Float(), nullable=True),
-        sa.Column("bussynes", sa.Float(), nullable=True),
+        sa.Column("plane_busyness", sa.Float(), nullable=True),
+        sa.Column("busyness", sa.Float(), nullable=True),
         sa.Column("open_leads", sa.Integer(), nullable=True),
         sa.Column("auction", sa.Boolean(), nullable=True),
         sa.Column("card_number", sa.String(length=256), nullable=True),

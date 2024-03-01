@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, update
+from sqlalchemy import and_, insert, select, update
 from sqlalchemy.exc import NoResultFound
 
 from src.db.models import Author
@@ -16,8 +16,17 @@ class AuthorRepository(Repository):
         except NoResultFound:
             return None
 
-    async def update_author_business(self, author_id, plane_bussyness):
-        stmt = update(self.model).where(self.model.telegram_id == author_id).values(plane_bussyness=plane_bussyness)
+    async def update_author_busyness_and_open_leads(self, author_id, busyness, open_leads):
+        stmt = (
+            update(self.model)
+            .where(self.model.telegram_id == author_id)
+            .values(busyness=busyness, open_leads=open_leads)
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+    async def update_author_plane_busyness(self, author_id, plane_busyness):
+        stmt = update(self.model).where(self.model.telegram_id == author_id).values(plane_busyness=plane_busyness)
         await self.session.execute(stmt)
         await self.session.commit()
 
@@ -26,8 +35,12 @@ class AuthorRepository(Repository):
         await self.session.execute(stmt)
         await self.session.commit()
 
-    async def get_not_business(self):
-        stmt = select(Author).where(Author.busyness < Author.plane_busyness).order_by(Author.rating.desc())
+    async def get_not_busyness_by_speciality(self, speciality):
+        stmt = (
+            select(self.model)
+            .where(and_(self.model.busyness < self.model.plane_busyness, self.model.specialities.isnot(None)))
+            .order_by(self.model.rating.desc())
+        )
         res = await self.session.execute(stmt)
         return res.scalars().all()
 

@@ -5,12 +5,13 @@ from loguru import logger
 
 from src.bot.filters.user import IsAuthor, IsNotRegisteredAuthor
 from src.bot.keyboards.author import answer_speciality, get_start_keyboard
-from src.bot.states.author import ChangeBussinessState, ChangeSpecialityState, RgisterFormState
+from src.bot.services.redis import get_public_auction_answer, set_public_auction_answer
+from src.bot.states.author import ChangeBussinessState, ChangeSpecialityState, MoneyState, RgisterFormState
 from src.crm.author import Author
 from src.db.services.author import (
     db_register_author,
     get_author_by_telegram_id,
-    update_author_busyness,
+    update_author_plane_busyness,
     update_author_specialities,
 )
 from src.db.services.lead import get_current_author_payments, get_current_author_tasks
@@ -158,7 +159,7 @@ async def get_author_specialities(message: types.Message, state: FSMContext, ses
             "Помилка в зміненні спеціальності!😢 \nЗвернись до свого менеджера",
             reply_markup=types.ReplyKeyboardRemove(),
         )
-        logger.error(f"Cant to update plane business: {repr(e)}")
+        logger.error(f"Cant to update plane busyness: {repr(e)}")
     else:
         await message.answer(
             "Вітаю! 🥳 Спеціальності були змінені!",
@@ -168,8 +169,8 @@ async def get_author_specialities(message: types.Message, state: FSMContext, ses
     await state.clear()
 
 
-@router.callback_query(F.data == "change_business", IsAuthor())
-async def change_business(callback: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == "change_busyness", IsAuthor())
+async def change_busyness(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
         "Вкажи бажане планове навантаження не більше 20",
         reply_markup=types.ReplyKeyboardRemove(),
@@ -178,28 +179,99 @@ async def change_business(callback: types.CallbackQuery, state: FSMContext):
 
 
 @router.message(F.text.func(lambda message: not message.isdigit()), ChangeBussinessState.get_bussines)
-async def action_change_business(message: types.Message):
+async def action_change_busyness(message: types.Message):
     await message.reply("Введіть правильне, ціле число")
 
 
 @router.message(F.text, ChangeBussinessState.get_bussines)
-async def change_plane_business(message: types.Message, state: FSMContext, session):
+async def change_plane_busyness(message: types.Message, state: FSMContext, session):
     author_id = message.from_user.id
-    plane_business = int(message.text)
+    plane_busyness = int(message.text)
 
-    if plane_business >= 20:
+    if plane_busyness >= 20:
         await message.reply("Введіть число яке не більше за 20")
         return
 
     author = await get_author_by_telegram_id(session, author_id)
 
     try:
-        await Author.update_author_busyness(author.id, plane_business, author.open_leads)
-        await update_author_busyness(session, author.telegram_id, plane_business)
+        await Author.update_author_busyness_and_open_leads(author.id, plane_busyness, author.open_leads)
+        await update_author_plane_busyness(session, author.telegram_id, plane_busyness)
     except Exception as e:
         await message.answer("Планова навантаженість не була змінена", reply_markup=types.ReplyKeyboardRemove())
-        logger.error(f"Cant to update plane business: {repr(e)}")
+        logger.error(f"Cant to update plane busyness: {repr(e)}")
     else:
         await message.answer("Планова навантаженість була успішно змінена", reply_markup=types.ReplyKeyboardRemove())
 
+    await state.clear()
+
+
+@router.callback_query(F.data.func(lambda c: "public" in c))
+async def author_public_auction(callback: types.CallbackQuery):
+    answer, lead_id, lead_type = callback.data.split("-")
+    author_id = callback.from_user.id
+
+    if (await get_public_auction_answer(lead_id, author_id)) == "wait":
+        await set_public_auction_answer(lead_id, author_id, answer)
+
+        if answer == "accept":
+            await callback.message.answer(
+                f"Чудово, замовлення №{lead_id} твоє!",
+                reply_markup=types.ReplyKeyboardRemove(),
+            )
+            logger.info(f"Автор {author_id} принял задание {lead_id}")
+        elif answer == "refuce":
+            await callback.message.answer("Дякую за в відповідь", reply_markup=types.ReplyKeyboardRemove())
+            logger.info(f"Автор [{author_id}] отказался от задания {lead_id}")
+    else:
+        await callback.answer("Замовлення не активне")
+
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+
+@router.callback_query(F.data.func(lambda c: "private" in c))
+async def admin_start(callback: types.CallbackQuery, state: FSMContext):
+    answer, lead_id, lead_type = callback.data.split("-")
+    author_id = callback.from_user.id
+
+    if (await get_public_auction_answer(lead_id, author_id)) == "wait":
+        if answer == "accept":
+            await callback.message.answer(
+                '👇Вкажи свою ставку (лише число, без "грн")',
+                reply_markup=types.ReplyKeyboardRemove(),
+            )
+            logger.info(f"Автор [{callback.from_user.id}] принял участие в аукционе")
+            await state.update_data(lead_id=lead_id)
+            await state.set_state(MoneyState.money)
+        else:
+            await callback.message.answer("Дякую за в відповідь", reply_markup=types.ReplyKeyboardRemove())
+            logger.info(f"Автор {author_id} отказался от приватного задания {lead_id}")
+    else:
+        await callback.answer("Замовлення не активне")
+
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+
+@router.message(F.text.func(lambda s: "вийти" in s.lower()), MoneyState.money)
+async def test_start(message: types.Message, state: FSMContext):
+    message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
+    await state.clear()
+
+
+@router.message(F.text.func(lambda s: not s.isdigit()), MoneyState.money)
+async def test_start(message: types.Message):
+    await message.reply("Введіть правильне число, або 'Вийти' для відмови від участі в аукціоні")
+
+
+@router.message(F.text, MoneyState.money)
+async def test_start(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    author_id = message.from_user.id
+    lead_id = data["lead_id"]
+    price = message.text
+
+    await set_public_auction_answer(lead_id, author_id, price)
+
+    logger.info(f'Автор {message.from_user.id} вытсавил цену {message.text} за задание {data["lead_id"]}')
+    await message.reply("⚖️Ставку прийнято! Ти отримаєш сповіщення, якщо твоя ставка виграє.")
     await state.clear()

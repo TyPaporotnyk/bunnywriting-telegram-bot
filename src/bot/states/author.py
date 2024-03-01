@@ -8,7 +8,7 @@ class RgisterFormState(StatesGroup):
     get_specialities = State()
 
 
-class ModeyFormState(StatesGroup):
+class MoneyState(StatesGroup):
     money = State()
 
 

@@ -1,8 +1,7 @@
 import asyncio
 from datetime import datetime, time
 
-from src.auction.find import find_auction_authors
-from src.worker.tasks import find_auction_authors_task
+from src.auction.find import find_auction_authors, find_private_auction_authors
 
 
 async def main():
@@ -12,7 +11,8 @@ async def main():
         now = datetime.now().time()
 
         if start_time < now < end_time:
-            find_auction_authors()
+            await find_auction_authors()
+            await find_private_auction_authors()
 
         else:
             await asyncio.sleep(3600)

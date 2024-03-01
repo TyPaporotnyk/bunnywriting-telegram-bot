@@ -1,5 +1,7 @@
 import asyncio
 
+from loguru import logger
+
 from src.crm.author import Author
 from src.crm.lead import Lead
 from src.db.services.author import load_crm_authors_to_db
@@ -14,6 +16,7 @@ async def dump():
 async def dump_authors():
     crm_authors = await dump_author_task()
     crm_authors = list(set(crm_authors))
+    logger.info(f"Collected {len(crm_authors)} authors from crm")
     await load_crm_authors_to_db(crm_authors)
 
 
@@ -36,6 +39,7 @@ async def dump_leads():
     crm_leads = await asyncio.gather(*tasks)
 
     crm_leads = list(set(sum(crm_leads, [])))
+    logger.info(f"Collected {len(crm_leads)} leads from crm")
 
     await load_crm_leads_to_db(crm_leads)
 

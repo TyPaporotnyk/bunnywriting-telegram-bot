@@ -34,11 +34,11 @@ async def get_author_name(message: types.Message, state: FSMContext, session):
     admin_id = message.from_user.id
 
     try:
-        telegram_id, author_id, full_name, raiting = list(map(str.strip, message.text.split(",")))
+        telegram_id, author_id, full_name, rating = list(map(str.strip, message.text.split(",")))
 
-        await Author.create_author(telegram_id, author_id, full_name, raiting, admin_id)
+        await Author.create_author(telegram_id, author_id, full_name, rating, admin_id)
         await create_base_author(
-            session, {"id": telegram_id, "name": full_name, "raiting": raiting, "admin_id": admin_id}
+            session, {"id": telegram_id, "name": full_name, "rating": rating, "admin_id": admin_id}
         )
 
         await message.answer("✅Автор був доданий")

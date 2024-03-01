@@ -21,8 +21,8 @@ class AuthorFieds:
     POSITION = 254484
     TEAMLEAD_ID = 1110804
     RATING = 1110796
-    PLANE_BUSINESS = 1110798
-    BUSINESSS = 1110800
+    PLANE_BUSYNESS = 1110798
+    BUSYNESS = 1110800
     OPEN_LEADS = 1110794
     COMMENT = 1110806
     SPECIALITIES = 1110802
@@ -53,10 +53,10 @@ def get_author_from_dict(data: dict):
         id=author_id,
         telegram_id=custom_fields.get(AuthorFieds.TELEGRAM_ID),
         custom_id=custom_fields.get(AuthorFieds.CUSTOM_ID),
-        raiting=custom_fields.get(AuthorFieds.RATING),
+        rating=custom_fields.get(AuthorFieds.RATING),
         admin_id=custom_fields.get(AuthorFieds.TEAMLEAD_ID),
-        plane_bussyness=custom_fields.get(AuthorFieds.PLANE_BUSINESS),
-        bussynes=custom_fields.get(AuthorFieds.BUSINESSS),
+        plane_busyness=custom_fields.get(AuthorFieds.PLANE_BUSYNESS),
+        busyness=custom_fields.get(AuthorFieds.BUSYNESS),
         open_leads=custom_fields.get(AuthorFieds.OPEN_LEADS),
         auction=custom_fields.get(AuthorFieds.IS_AUCTION),
         card_number=custom_fields.get(AuthorFieds.CARD_NUMBER),
@@ -135,7 +135,7 @@ class Author:
         return [get_author_from_dict(author) for author in response.json()["_embedded"]["contacts"]]
 
     @classmethod
-    async def create_author(cls, telegram_id, user_id, full_name, raiting, team_lead) -> bool:
+    async def create_author(cls, telegram_id, user_id, full_name, rating, team_lead) -> bool:
         """Создает нового автора"""
         first_name, last_name = full_name.split(" ")
         json_data = [
@@ -144,11 +144,11 @@ class Author:
                 "last_name": last_name,
                 "custom_fields_values": [
                     {"field_id": AuthorFieds.TELEGRAM_ID, "values": [{"value": str(telegram_id)}]},
-                    {"field_id": AuthorFieds.RATING, "values": [{"value": raiting}]},
+                    {"field_id": AuthorFieds.RATING, "values": [{"value": rating}]},
                     {"field_id": AuthorFieds.CUSTOM_ID, "values": [{"value": str(user_id)}]},
                     {"field_id": AuthorFieds.TEAMLEAD_ID, "values": [{"value": str(team_lead)}]},
-                    {"field_id": AuthorFieds.PLANE_BUSINESS, "values": [{"value": 0}]},
-                    {"field_id": AuthorFieds.BUSINESSS, "values": [{"value": 0}]},
+                    {"field_id": AuthorFieds.PLANE_BUSYNESS, "values": [{"value": 0}]},
+                    {"field_id": AuthorFieds.BUSYNESS, "values": [{"value": 0}]},
                     {"field_id": AuthorFieds.OPEN_LEADS, "values": [{"value": 0}]},
                     {"field_id": AuthorFieds.IS_AUTHOR, "values": [{"value": "True"}]},
                     {"field_id": AuthorFieds.IS_AUCTION, "values": [{"value": "True"}]},
@@ -175,19 +175,21 @@ class Author:
         await cls._make_update_request(author_id, json_data)
 
     @classmethod
-    async def update_plane_business(cls, author_id, business):
+    async def update_plane_busyness(cls, author_id, busyness):
         """Обновляет плановую нагруженность автора"""
-        json_data = {"custom_fields_values": [{"field_id": 1110798, "values": [{"value": business}]}]}
+        json_data = {
+            "custom_fields_values": [{"field_id": AuthorFieds.PLANE_BUSYNESS, "values": [{"value": busyness}]}]
+        }
 
         await cls._make_update_request(author_id, json_data)
 
     @classmethod
-    async def update_author_busyness(cls, author_id, bussines: float, open_leads: int):
+    async def update_author_busyness_and_open_leads(cls, author_id, bussines: float, open_leads: int):
         """Обновляет нагруженность автора"""
         json_data = {
             "custom_fields_values": [
                 {
-                    "field_id": AuthorFieds.BUSINESSS,
+                    "field_id": AuthorFieds.BUSYNESS,
                     "values": [{"value": float(bussines) if bussines is not None else 0}],
                 },
                 {"field_id": AuthorFieds.OPEN_LEADS, "values": [{"value": int(open_leads)}]},
