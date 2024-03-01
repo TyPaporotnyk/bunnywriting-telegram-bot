@@ -22,7 +22,7 @@ from src.db.services.author import get_not_busyness_authors, update_author_busyn
 async def send_auction_message(author_id: int, lead: LeadSchema):
     message = (
         "\t🟢 НОВЕ ЗАМОВЛЕННЯ 🟢\n"
-        f"🆔: {lead.id}\n"
+        f"🆔: #{lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -45,7 +45,7 @@ async def send_auction_message(author_id: int, lead: LeadSchema):
 async def send_private_auction_messages(author_ids: List[int], lead: LeadSchema):
     message = (
         "\t🟡АУКЦІОН🟡\n"
-        f"🆔: {lead.id}\n"
+        f"🆔: #{lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -109,8 +109,15 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
 
                 logger.info(f"Author {author.telegram_id} becomes the owner of the project: {lead.id}")
                 break
-            else:
+            elif answer == "refuce":
                 logger.info(f"Author {author.telegram_id} declined participation of the project: {lead.id}")
+            else:
+                await send_message(
+                    bot,
+                    author.telegram_id,
+                    f"Термін прийому завдання #{lead.id} завершився",
+                    keyboard=types.ReplyKeyboardRemove(),
+                )
 
     return (flag, lead)
 
@@ -192,7 +199,7 @@ async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
     await broadcast(
         bot,
         author_ids,
-        "Аукціон завершено!",
+        f"Термін прийому участі в аукціоні #{lead.id} завершився",
         keyboard=types.ReplyKeyboardRemove(),
     )
 
