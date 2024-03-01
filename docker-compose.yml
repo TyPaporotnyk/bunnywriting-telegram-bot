@@ -18,10 +18,10 @@ services:
     depends_on:
       - redis
 
-  action:
+  auction:
     extends:
       service: common
-    command: poetry run python -m src.action
+    command: poetry run python -m src.auction
     depends_on:
       - redis
 
