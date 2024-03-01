@@ -8,7 +8,6 @@ from src.bot.utils import logging
 
 
 async def main():
-
     middlewares.setup(dp)
     handlers.setup(dp)
 

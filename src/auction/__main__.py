@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from loguru import logger
 
@@ -11,7 +11,7 @@ async def main():
     start_time = time(8, 0)
     end_time = time(22, 0)
     while True:
-        now = datetime.now().time()
+        now = (datetime.now() + timedelta(hours=2)).time()
 
         if start_time < now < end_time:
             logger.info("Start auction sennding")
