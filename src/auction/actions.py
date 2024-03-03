@@ -103,7 +103,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
 
                 await update_author_busyness_and_open_leads(author.telegram_id, busyness, open_leads)
                 await Author.update_author_busyness_and_open_leads(author.id, busyness, open_leads)
-                await Lead.update_lead_author(lead.id, author.custom_id, author.admin_id)
+                await Lead.update_lead_author(lead.id, author.custom_id, author.name, author.admin_id)
                 await Lead.update_lead_status(lead.id, 53018611)
                 flag = True
 
@@ -119,7 +119,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                     f"Термін прийому завдання #{lead.id} завершився",
                     keyboard=types.ReplyKeyboardRemove(),
                 )
-        
+
     return (flag, lead)
 
 
@@ -172,7 +172,7 @@ async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
         # Вносим изменения сразу в базу данных и в CRM
         await update_author_busyness_and_open_leads(author.telegram_id, busyness, open_leads)
         await Author.update_author_busyness_and_open_leads(author.id, busyness, open_leads)
-        await Lead.update_lead_author(lead.id, author.custom_id, author.admin_id)
+        await Lead.update_lead_author(lead.id, author.custom_id, author.name, author.admin_id)
         await Lead.update_lead_price(lead.id, price)
         await Lead.update_lead_status(lead.id, 53018611)
 

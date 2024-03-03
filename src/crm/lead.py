@@ -221,33 +221,14 @@ class Lead:
         await cls._make_update_request(lead_id, json_data)
 
     @classmethod
-    async def update_lead_author(cls, lead_id, author_crm_id, author_teamlead_id) -> bool:
+    async def update_lead_author(cls, lead_id, author_crm_id, author_name, author_teamlead_id) -> bool:
         json_data = {
             "custom_fields_values": [
                 {"field_id": 254968, "values": [{"value": str(author_crm_id)}]},
+                {"field_id": 254966, "values": [{"value": str(author_name)}]},
                 # {"field_id": 1116279, "values": [{"value": str(author_crm_id)}]},
                 {"field_id": 254968, "values": [{"value": str(author_crm_id)}]},
                 {"field_id": 255084, "values": [{"value": str(author_teamlead_id)}]},
-            ]
-        }
-
-        await cls._make_update_request(lead_id, json_data)
-
-    @classmethod
-    async def update_lead_author_name(cls, lead_id, author_name) -> bool:
-        json_data = {
-            "custom_fields_values": [
-                {"field_id": 255098, "values": [{"value": str(author_name)}]},
-            ]
-        }
-
-        await cls._make_update_request(lead_id, json_data)
-
-    @classmethod
-    async def update_lead_id(cls, lead_id) -> bool:
-        json_data = {
-            "custom_fields_values": [
-                {"field_id": 254734, "values": [{"value": str(lead_id)}]},
             ]
         }
 

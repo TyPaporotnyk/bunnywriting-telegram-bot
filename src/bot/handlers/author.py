@@ -91,7 +91,7 @@ async def get_current_tasks(callback: types.CallbackQuery, session):
 
     for author_task in author_tasks:
         message = (
-            f"🆔: {author_task.id}\n"
+            f"🆔: #{author_task.id}\n"
             f"📌**Статус**: {author_task.status}\n"
             f"◽️ **Пріоритет**:{author_task.priority}\n"
             f"◾️ Спеціальність: {author_task.speciality}\n"
@@ -101,7 +101,7 @@ async def get_current_tasks(callback: types.CallbackQuery, session):
             f"◾️ Унікальність: {author_task.uniqueness}\n"
             f"◽️ Дедлайн: {author_task.deadline_for_author}\n"
             f"◾️ Коментар: {author_task.note}\n"
-            f"💸 Ціна: {author_task.sale}\n"
+            f"💸 Ціна: {author_task.expenses}\n"
         )
 
         await callback.message.answer(message)
