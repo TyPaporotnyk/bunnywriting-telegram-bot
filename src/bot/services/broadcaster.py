@@ -9,20 +9,15 @@ async def send_message(bot: Bot, author_id: int, message: str, keyboard=None) ->
         await bot.send_message(author_id, message, reply_markup=keyboard)
         logging.info(f"Message sent successfully to [ID:{author_id}]")
         return True
-    except exceptions.TelegramBadRequest:
-        logging.error(f"Failed to send message to [ID:{author_id}]. Bad request.")
     except exceptions.TelegramForbiddenError:
         logging.error(f"Failed to send message to [ID:{author_id}]. Forbidden error.")
     except exceptions.TelegramRetryAfter as e:
         logging.error(f"Flood limit exceeded for [ID:{author_id}]. Sleeping for {e.retry_after} seconds.")
         await asyncio.sleep(e.retry_after)
         return await send_message(bot, author_id, message)  # Рекурсивный вызов после ожидания
-    except exceptions.TelegramAPIError:
-        logging.error(f"Failed to send message to [ID:{author_id}]. Telegram API error.")
     except Exception:
         logging.exception(f"An unexpected error occurred while sending message to [ID:{author_id}].")
 
-    logging.error(f"Message delivery to [ID:{author_id}] failed.")
     return False
 
 

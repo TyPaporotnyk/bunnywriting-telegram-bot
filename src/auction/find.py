@@ -63,6 +63,6 @@ async def find_private_auction_authors():
             is_finifshed_task = task_result[0]
             task_lead = task_result[1]
             if not is_finifshed_task:
-                await update_lead_status(task_lead, 53018607, 53018519)
+                await update_lead_status(task_lead, 53018607, 53018611)
     else:
         logger.info("No new private orders")
