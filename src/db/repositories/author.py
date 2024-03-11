@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import and_, insert, select, update
 from sqlalchemy.exc import NoResultFound
 
@@ -35,11 +37,18 @@ class AuthorRepository(Repository):
         await self.session.execute(stmt)
         await self.session.commit()
 
-    async def get_not_busyness_by_speciality(self, speciality):
+    async def get_not_busyness_by_speciality(self, koef: int, speciality: str) -> List[Author]:
         stmt = (
             select(self.model)
-            .where(and_(self.model.busyness < self.model.plane_busyness, self.model.specialities.isnot(None)))
-            .order_by(self.model.rating.desc())
+            .where(
+                and_(
+                    (self.model.busyness + koef) < self.model.plane_busyness,
+                    self.model.specialities.isnot(None),
+                    self.model.specialities.ilike(f"%{speciality}%"),
+                    self.model.rating != 0,
+                )
+            )
+            .order_by(self.model.rating.desc(), self.model.busyness.asc())
         )
         res = await self.session.execute(stmt)
         return res.scalars().all()

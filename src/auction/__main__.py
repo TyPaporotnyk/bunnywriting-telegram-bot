@@ -6,6 +6,7 @@ from loguru import logger
 from src.auction.find import find_auction_authors, find_private_auction_authors
 from src.bot.utils import logging
 
+
 async def main():
     logger.info("Start auction")
     start_time = time(8, 0)

@@ -29,10 +29,10 @@ async def get_author_leads(session, author_id):
     return author.leads
 
 
-async def get_not_busyness_authors(speciality) -> List[Author]:
+async def get_not_busyness_authors(koef, speciality) -> List[Author]:
     async with session_maker() as session:
         author_repository = AuthorRepository(session)
-        return await author_repository.get_not_busyness_by_speciality(speciality)
+        return await author_repository.get_not_busyness_by_speciality(koef, speciality)
 
 
 async def update_author_specialities(session, author_id, specialities):

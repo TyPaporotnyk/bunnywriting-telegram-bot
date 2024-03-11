@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-from datetime import datetime
 from typing import List
 from urllib.parse import urlencode, urljoin
 
@@ -88,7 +86,6 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         expenses_multy=custom_fields.get(255030),
         note=custom_fields.get(255082),
         team_lead=custom_fields.get(255084),
-        priority=custom_fields.get(255096),
         sec_author=custom_fields.get(255098),
         alert=custom_fields.get(255100),
         sec_price=custom_fields.get(1110362),

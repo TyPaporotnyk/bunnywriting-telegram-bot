@@ -86,10 +86,7 @@ async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
 async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSchema]:
     await asyncio.sleep(delay)
 
-    authors = await get_not_busyness_authors(lead.speciality)
-    authors = list(filter(lambda x: lead.speciality in str(x.specialities), authors))
-    authors = sorted(authors, key=lambda s: s.busyness + lead.koef)
-
+    authors = await get_not_busyness_authors(lead.koef, lead.speciality)
     logger.info(f"Deal {lead.id} has {len(authors)} authors")
 
     flag = False
@@ -128,7 +125,6 @@ async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
 
     # Получаем всех авторов которые могут участвовать в приватном аукционе
     authors = await get_not_busyness_authors(lead.speciality)
-    authors = list(filter(lambda x: lead.speciality in str(x.specialities), authors))
 
     logger.info(f"Private deal {lead.id} has {len(authors)} authors")
 
@@ -152,7 +148,7 @@ async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
     author_ids_with_prices = [
         (author_id, author_rates[author_id]) for author_id in author_rates if author_rates[author_id].isdigit()
     ]
-    author_ids_with_prices = sorted(author_ids_with_prices, key=lambda s: s[1])
+    author_ids_with_prices = sorted(author_ids_with_prices, key=lambda s: int(s[1]))
     logger.debug(author_ids_with_prices)
 
     if not author_ids_with_prices:

@@ -21,6 +21,21 @@ async def get_deadlined_author_tasks(session, author_id) -> List[Lead]:
     return await lead_repository.get_deadlined_author_tasks(author_id)
 
 
+async def get_leads_by_status(session, status) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_leads_by_status(status)
+
+
+async def update_lead_priority(session, lead_id, priority):
+    lead_repository = LeadRepository(session)
+    return await lead_repository.update_lead_priority(lead_id, priority)
+
+
+async def update_lead_alert_comment(session, lead_id, alert_comment: str):
+    lead_repository = LeadRepository(session)
+    return await lead_repository.update_lead_alert_comment(lead_id, alert_comment)
+
+
 async def load_crm_leads_to_db(leads: List[LeadSchema]):
     async with session_maker() as session:
         lead_repository = LeadRepository(session)
