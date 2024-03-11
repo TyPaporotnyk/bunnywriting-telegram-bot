@@ -29,13 +29,13 @@ class AuthorSchema(BaseModel):
 
 class LeadSchema(BaseModel):
     id: int
-    pipeline: str
+    pipeline: Optional[str]
     status: Optional[str]
-    name: str
-    created_at: datetime
-    updated_at: datetime
-    created_by: datetime
-    updated_by: datetime
+    name: Optional[str]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    created_by: Optional[datetime]
+    updated_by: Optional[datetime]
     contact: Optional[str]
     sale: Optional[int]
     date: Optional[datetime]
@@ -56,7 +56,6 @@ class LeadSchema(BaseModel):
     expenses_multy: Optional[int]
     note: Optional[str]
     team_lead: Optional[int]
-    priority: Optional[int]
     sec_author: Optional[str]
     alert: Optional[int]
     sec_price: Optional[int]

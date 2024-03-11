@@ -63,6 +63,12 @@ async def send_private_auction_messages(author_ids: List[int], lead: LeadSchema)
     )
 
 
+async def check_lead_status(lead: LeadSchema) -> bool:
+    new_lead = await Lead.get_lead(lead.id)
+
+    return lead.status == new_lead.status
+
+
 async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
     time = 0
     answer = ""
@@ -120,11 +126,11 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
     return (flag, lead)
 
 
-async def find_private_authors(lead: Lead, delay: int = 0) -> tuple[bool, Lead]:
+async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, Lead]:
     await asyncio.sleep(delay)
 
     # Получаем всех авторов которые могут участвовать в приватном аукционе
-    authors = await get_not_busyness_authors(lead.speciality)
+    authors = await get_not_busyness_authors(lead.koef, lead.speciality)
 
     logger.info(f"Private deal {lead.id} has {len(authors)} authors")
 
