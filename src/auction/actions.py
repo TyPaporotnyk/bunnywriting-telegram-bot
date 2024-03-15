@@ -187,7 +187,6 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
             keyboard=types.ReplyKeyboardRemove(),
         )
 
-
     if len(author_ids_with_prices) >= 2:
         author_data = author_ids_with_prices[1]
         author_id = author_data[0]

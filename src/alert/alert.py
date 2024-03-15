@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 from loguru import logger
 
 from src.bot.misc import bot
+from src.bot.services.broadcaster import send_message
 from src.db.database import session_maker
 from src.db.services.author import get_author_by_telegram_id
 from src.db.services.lead import get_leads_by_status, update_lead_com_alert, update_lead_priority
-
-from src.bot.services.broadcaster import send_message
 
 
 async def send_alert_message(bot, author, lead, message):
@@ -50,7 +49,9 @@ async def alert_scheduler():
         await process_leads(session, leads_plan, "План", [24, 36, 48], ["12h", "12h", "24h"])
 
         leads_in_progress = await get_leads_by_status("В роботі")
-        await process_leads(session, leads_in_progress, "В роботі", [12, 24, 48, 72, 120], ["12h", "24h", "48h", "72h", "120h"])
+        await process_leads(
+            session, leads_in_progress, "В роботі", [12, 24, 48, 72, 120], ["12h", "24h", "48h", "72h", "120h"]
+        )
 
         leads_corrections = await get_leads_by_status("Правки в роботі")
         await process_leads(
