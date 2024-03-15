@@ -22,7 +22,7 @@ from src.db.services.author import get_not_busyness_authors, update_author_busyn
 async def send_auction_message(author_id: int, lead: LeadSchema):
     message = (
         "\t🟢 НОВЕ ЗАМОВЛЕННЯ 🟢\n"
-        f"🆔: #{lead.id}\n"
+        f"🆔: #lead{lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -45,7 +45,7 @@ async def send_auction_message(author_id: int, lead: LeadSchema):
 async def send_private_auction_messages(author_ids: List[int], lead: LeadSchema):
     message = (
         "\t🟡АУКЦІОН🟡\n"
-        f"🆔: #{lead.id}\n"
+        f"🆔: #lead{lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -119,7 +119,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                 await send_message(
                     bot,
                     author.telegram_id,
-                    f"Термін прийому завдання #{lead.id} завершився",
+                    f"Термін прийому завдання #lead{lead.id} завершився",
                     keyboard=types.ReplyKeyboardRemove(),
                 )
 
@@ -157,8 +157,7 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
     author_ids_with_prices = sorted(author_ids_with_prices, key=lambda s: int(s[1]))
     logger.debug(author_ids_with_prices)
 
-    if not author_ids_with_prices:
-        return (True, lead)
+    flag = False
 
     if len(author_ids_with_prices) >= 1:
         author_data = author_ids_with_prices[0]
@@ -177,15 +176,17 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
         await Lead.update_lead_author(lead.id, author.custom_id, author.name, author.admin_id)
         await Lead.update_lead_price(lead.id, price)
         await Lead.update_lead_status(lead.id, 53018611)
+        flag = True
 
         logger.info(f"Автор [{author.telegram_id}] становиться владельцем проекта [{lead.id}]")
 
         await send_message(
             bot,
             author.telegram_id,
-            f"😎Твоя ставка до замовлення ID {lead.id} перемогла! Менеджер зв`яжеться з тобою в скорому часу.",
+            f"😎Твоя ставка до замовлення ID #lead{lead.id} перемогла! Менеджер зв`яжеться з тобою в скорому часу.",
             keyboard=types.ReplyKeyboardRemove(),
         )
+
 
     if len(author_ids_with_prices) >= 2:
         author_data = author_ids_with_prices[1]
@@ -202,8 +203,8 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
     await broadcast(
         bot,
         author_ids,
-        f"Термін прийому участі в аукціоні #{lead.id} завершився",
+        f"Термін прийому участі в аукціоні #lead{lead.id} завершився",
         keyboard=types.ReplyKeyboardRemove(),
     )
 
-    return (True, lead)
+    return (flag, lead)
