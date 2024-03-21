@@ -325,6 +325,7 @@ tags
 
 # Redis dump file
 dump.rdb
+.idea/*
 
 data/celerybeat-schedule.db
 data/token.json
