@@ -1,8 +1,6 @@
 import json
 from typing import Optional
 
-from loguru import logger
-
 from src.bot.misc import redis_client
 
 
