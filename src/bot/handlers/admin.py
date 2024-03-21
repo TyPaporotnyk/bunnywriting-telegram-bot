@@ -80,12 +80,12 @@ async def admin_mailing_message(message: types.Message, state: FSMContext, sessi
 
 
 @router.callback_query(F.data == "author_payments", IsAdmin())
-async def author_payments(callback: types.CallbackQuery, state: FSMContext, session):
+async def author_payments(callback: types.CallbackQuery, session):
     admin_id = callback.from_user.id
     authors = await get_admin_authors(session, admin_id)
 
     if not authors:
-        callback.answer("У вас немає жодного автора")
+        await callback.answer("У вас немає жодного автора")
         return
 
     for author in authors:
@@ -105,12 +105,12 @@ async def author_payments(callback: types.CallbackQuery, state: FSMContext, sess
 
 
 @router.callback_query(F.data == "author_deadlines", IsAdmin())
-async def author_deadlines(callback: types.CallbackQuery, state: FSMContext, session):
+async def author_deadlines(callback: types.CallbackQuery, session):
     admin_id = callback.from_user.id
     authors = await get_admin_authors(session, admin_id)
 
     if not authors:
-        callback.answer("У вас немає жодного автора")
+        await callback.answer("У вас немає жодного автора")
         return
 
     for author in authors:
