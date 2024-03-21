@@ -91,7 +91,7 @@ async def get_current_tasks(callback: types.CallbackQuery, session):
 
     for author_task in author_tasks:
         message = (
-            f"🆔: #{author_task.id}\n"
+            f"🆔: {author_task.id}\n"
             f"📌**Статус**: {author_task.status}\n"
             f"◽️ **Пріоритет**:{author_task.priority}\n"
             f"◾️ Спеціальність: {author_task.speciality}\n"
@@ -180,7 +180,7 @@ async def change_busyness(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(F.text.func(lambda s: "вийти" in str(s).lower()), ChangeBussinessState.get_bussines)
 async def test_start(message: types.Message, state: FSMContext):
-    message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
+    await message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
     await state.clear()
 
 
@@ -236,7 +236,7 @@ async def author_public_auction(callback: types.CallbackQuery):
 
 
 @router.callback_query(F.data.func(lambda c: "private" in c))
-async def admin_start(callback: types.CallbackQuery, state: FSMContext):
+async def author_get_private_auction(callback: types.CallbackQuery, state: FSMContext):
     answer, lead_id, lead_type = callback.data.split("-")
     author_id = callback.from_user.id
 
@@ -259,18 +259,18 @@ async def admin_start(callback: types.CallbackQuery, state: FSMContext):
 
 
 @router.message(F.text.func(lambda s: "вийти" in s.lower()), MoneyState.money)
-async def test_start(message: types.Message, state: FSMContext):
-    message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
+async def author_exit_set_money(message: types.Message, state: FSMContext):
+    await message.reply("Дякую за відповідь", reply_markup=types.ReplyKeyboardRemove())
     await state.clear()
 
 
 @router.message(F.text.func(lambda s: not s.isdigit()), MoneyState.money)
-async def test_start(message: types.Message):
+async def author_except_set_money(message: types.Message):
     await message.reply("Введіть правильне число, або 'Вийти' для відмови від участі в аукціоні")
 
 
 @router.message(F.text, MoneyState.money)
-async def test_start(message: types.Message, state: FSMContext):
+async def author_success_set_money(message: types.Message, state: FSMContext):
     data = await state.get_data()
     author_id = message.from_user.id
     lead_id = data["lead_id"]

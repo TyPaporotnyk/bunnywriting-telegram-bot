@@ -1,11 +1,11 @@
 from typing import List
 
-from src.db.models import Lead
+from src.db.models import Author, Lead
 from src.db.repositories.admin import AdminRepository
 from src.db.services.author import get_author_leads
 
 
-async def get_admin_authors(session, admin_id) -> List[int]:
+async def get_admin_authors(session, admin_id) -> List[Author]:
     admin_repository = AdminRepository(session)
     admin = await admin_repository.get(id=admin_id)
 

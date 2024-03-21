@@ -22,7 +22,7 @@ from src.db.services.author import get_not_busyness_authors, update_author_busyn
 async def send_auction_message(author_id: int, lead: LeadSchema):
     message = (
         "\t🟢 НОВЕ ЗАМОВЛЕННЯ 🟢\n"
-        f"🆔: #lead{lead.id}\n"
+        f"🆔: {lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -45,7 +45,7 @@ async def send_auction_message(author_id: int, lead: LeadSchema):
 async def send_private_auction_messages(author_ids: List[int], lead: LeadSchema):
     message = (
         "\t🟡АУКЦІОН🟡\n"
-        f"🆔: #lead{lead.id}\n"
+        f"🆔: {lead.id}\n"
         f"◾️ Спеціальність: {lead.speciality}\n"
         f"◽️ Вид роботи: {lead.work_type}\n"
         f"◾️ Тема: {lead.thema}\n"
@@ -119,14 +119,14 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                 await send_message(
                     bot,
                     author.telegram_id,
-                    f"Термін прийому завдання #lead{lead.id} завершився",
+                    f"Термін прийому завдання {lead.id} завершився",
                     keyboard=types.ReplyKeyboardRemove(),
                 )
 
-    return (flag, lead)
+    return flag, lead
 
 
-async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, Lead]:
+async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSchema]:
     await asyncio.sleep(delay)
 
     # Получаем всех авторов которые могут участвовать в приватном аукционе
@@ -135,7 +135,7 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
     logger.info(f"Private deal {lead.id} has {len(authors)} authors")
 
     if not authors:
-        return (False, lead)
+        return False, lead
 
     # Получаем id авторов и рассылаем им всем прикглащение на участие
     author_ids = [author.telegram_id for author in authors]
@@ -145,7 +145,6 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
     await send_private_auction_messages(author_ids, lead)
 
     # Ждет пока авторы успеют дать свои ответы
-    # await asyncio.sleep(1800)
     await asyncio.sleep(1800)
 
     # Получаем результаты аукциона и отправляем сообщения победителям
@@ -183,7 +182,7 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
         await send_message(
             bot,
             author.telegram_id,
-            f"😎Твоя ставка до замовлення ID #lead{lead.id} перемогла! Менеджер зв`яжеться з тобою в скорому часу.",
+            f"😎Твоя ставка до замовлення ID {lead.id} перемогла! Менеджер зв`яжеться з тобою в скорому часу.",
             keyboard=types.ReplyKeyboardRemove(),
         )
 
@@ -202,8 +201,8 @@ async def find_private_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, 
     await broadcast(
         bot,
         author_ids,
-        f"Термін прийому участі в аукціоні #lead{lead.id} завершився",
+        f"Термін прийому участі в аукціоні {lead.id} завершився",
         keyboard=types.ReplyKeyboardRemove(),
     )
 
-    return (flag, lead)
+    return flag, lead

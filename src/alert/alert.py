@@ -38,7 +38,7 @@ async def process_leads(sesson, leads, status, hours_conditions, com_alert_value
 
                         break
 
-        except Exception as e:
+        except Exception:
             logger.warning(f"Ошибка отправки напоминания. Статус: {status}, Lead ID: {lead['id']}")
     await asyncio.sleep(43200)
 
