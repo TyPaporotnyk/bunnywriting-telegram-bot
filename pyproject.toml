@@ -30,14 +30,19 @@ optional=false
 black = "^24.2.0"
 isort = "^5.13.2"
 flake8 = "^7.0.0"
-mypy = "^1.8.0"
 pytest-asyncio = "^0.23.5"
 pytest = "^8.0.1"
+pre-commit = "^3.7.0"
 
+[tool.pytest.ini_options]
+pythonpath = [
+    ".", "src"
+]
+asyncio_mode = "auto"
 
 [tool.black]
 line-length = 119
-target-version = ['py311']
+target-version = ['py312']
 
 [tool.isort]
 profile = "black"
@@ -45,15 +50,8 @@ line_length = 119
 known_first_party = [
     "src",
 ]
-skip = ["venv/"]
+skip = ["venv/", "migrations/"]
 
-[tool.mypy]
-python_version = "3.11"
-check_untyped_defs = true
-ignore_missing_imports = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_unused_configs = true
 
 [build-system]
 requires = ["poetry-core"]
