@@ -1,4 +1,6 @@
-from sqlalchemy import select, update
+from datetime import datetime, timedelta
+
+from sqlalchemy import and_, desc, select, update
 
 from src.db.models import Lead
 from src.db.repositories.abstract import Repository
@@ -43,3 +45,19 @@ class LeadRepository(Repository):
         stmt = update(self.model).where(self.model.id == lead_id).values(alert_comment=alert_comment)
         await self.session.execute(stmt)
         await self.session.commit()
+
+    async def get_admin_urgent_list(self, team_lead):
+        status_conditions = ["План", "Правки план", "В роботі"]
+        current_date = datetime.now() + timedelta(days=7)
+        stmt = (
+            select(self.model)
+            .where(
+                (self.model.team_lead == team_lead)
+                & (self.model.deadline_for_author <= current_date)
+                & (self.model.status.in_(status_conditions))
+            )
+            .order_by(desc(self.model.deadline_for_author))
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

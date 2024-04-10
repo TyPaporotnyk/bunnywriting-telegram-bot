@@ -7,3 +7,7 @@ class UserFormState(StatesGroup):
 
 class MailingFormState(StatesGroup):
     message = State()
+
+
+class UrgentStates(StatesGroup):
+    get_list_type = State()

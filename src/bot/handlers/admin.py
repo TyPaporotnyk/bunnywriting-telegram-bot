@@ -10,7 +10,7 @@ from src.crm.author import Author
 from src.crm.exceptions import AuthorNotCreated
 from src.db.services.admin import get_admin_author_ids, get_admin_authors
 from src.db.services.author import create_base_author
-from src.db.services.lead import get_current_author_payments, get_current_author_tasks
+from src.db.services.lead import get_current_author_payments, get_current_author_tasks, get_urgent_list
 from src.worker import send_user_messages_task
 
 router = Router(name="admin")
@@ -121,6 +121,21 @@ async def author_deadlines(callback: types.CallbackQuery, session):
 
         leads_message = f"Автор: {author.custom_id}, {author.name}\n"
         for author_task in author_tasks:
-            leads_message += f"{author_task.id} - {author_task.deadline_for_author} - {author_task.status}\n"
+            leads_message += f"{author_task.id} - {author_task.real_deadline} - {author_task.status}\n"
 
         await callback.message.answer(leads_message)
+
+
+@router.callback_query(F.data == "urgent_list", IsAdmin())
+async def show_urgent_list(callback: types.CallbackQuery, session):
+    """
+    Show the urgent list of the authors
+    """
+    admin_id = callback.from_user.id
+    urgent_list = await get_urgent_list(session, admin_id)
+
+    message = ""
+    for urgent in urgent_list:
+        message += f"{urgent.id}; {urgent.deadline_for_author}; {urgent.author_id}\n"
+
+    await callback.message.answer(message)

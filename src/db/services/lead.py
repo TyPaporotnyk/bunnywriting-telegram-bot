@@ -1,5 +1,7 @@
 from typing import List
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.db.database import session_maker
 from src.db.models import Lead
 from src.db.repositories.lead import LeadRepository
@@ -34,6 +36,11 @@ async def update_lead_priority(session, lead_id, priority):
 async def update_lead_alert_comment(session, lead_id, alert_comment: str):
     lead_repository = LeadRepository(session)
     return await lead_repository.update_lead_alert_comment(lead_id, alert_comment)
+
+
+async def get_urgent_list(session: AsyncSession, team_lead: int) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_admin_urgent_list(team_lead=team_lead)
 
 
 async def load_crm_leads_to_db(leads: List[LeadSchema]):

@@ -7,6 +7,7 @@ from loguru import logger
 from src.config import settings
 from src.crm.exceptions import LeadNotCreated, LeadNotUpdated
 from src.crm.token import Token
+from src.crm.utils import get_model_custom_fields
 from src.db.schemas import LeadSchema
 
 statuses = {
@@ -42,20 +43,8 @@ pipelines = {
 def get_lead_from_dict(data: dict) -> LeadSchema:
     lead_name = data["name"]
     lead_id = data["id"]
-    custom_fields = {}
-    fields = data.get("custom_fields_values", [])
-    fields = fields if fields else []
-    for field in fields:
-        filed_id = field["field_id"]
-        field_values = field["values"]
-        field_type = field["field_type"]
 
-        if field_type == "multiselect":
-            field_values = [value["value"] for value in field_values]
-        else:
-            field_values = field["values"][0]["value"]
-
-        custom_fields.setdefault(filed_id, field_values)
+    custom_fields = get_model_custom_fields(data)
 
     return LeadSchema(
         id=lead_id,
@@ -80,12 +69,12 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         files=custom_fields.get(254910),
         fix_time=custom_fields.get(254964),
         author_name=custom_fields.get(254966),
-        author_id=custom_fields.get(254968),
+        author_id=custom_fields.get(254968) if str(custom_fields.get(254968)).isdigit() else None,
         expenses=custom_fields.get(1110830),
         expenses_status=custom_fields.get(254978),
         expenses_multy=custom_fields.get(255030),
         note=custom_fields.get(255082),
-        team_lead=custom_fields.get(255084),
+        team_lead=custom_fields.get(255084) if str(custom_fields.get(255084)).isdigit() else None,
         sec_author=custom_fields.get(255098),
         alert=custom_fields.get(255100),
         sec_price=custom_fields.get(1110362),
@@ -210,7 +199,7 @@ class Lead:
         return get_lead_from_dict(response.json())
 
     @classmethod
-    async def update_lead_status(cls, lead_id, status_id) -> bool:
+    async def update_lead_status(cls, lead_id, status_id):
         json_data = {
             "status_id": status_id,
         }
@@ -218,7 +207,7 @@ class Lead:
         await cls._make_update_request(lead_id, json_data)
 
     @classmethod
-    async def update_lead_author(cls, lead_id, author_crm_id, author_name, author_teamlead_id) -> bool:
+    async def update_lead_author(cls, lead_id, author_crm_id, author_name, author_teamlead_id):
         json_data = {
             "custom_fields_values": [
                 {"field_id": 254968, "values": [{"value": str(author_crm_id)}]},
@@ -232,7 +221,7 @@ class Lead:
         await cls._make_update_request(lead_id, json_data)
 
     @classmethod
-    async def update_lead_price(cls, lead_id, price) -> bool:
+    async def update_lead_price(cls, lead_id, price):
         json_data = {
             "custom_fields_values": [
                 {"field_id": 1110830, "values": [{"value": str(price)}]},

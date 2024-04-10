@@ -3,11 +3,11 @@ from typing import List
 from urllib.parse import urlencode, urljoin
 
 import httpx
-from loguru import logger
 
 from src.config import settings
 from src.crm.exceptions import AuthorNotCreated, AuthorNotUpdated
 from src.crm.token import Token
+from src.crm.utils import get_model_custom_fields
 from src.db.schemas import AuthorSchema, SpecialitySchema
 
 
@@ -33,20 +33,8 @@ class AuthorFieds:
 def get_author_from_dict(data: dict):
     name = data["name"]
     author_id = data["id"]
-    custom_fields = {}
-    fields = data.get("custom_fields_values", [])
 
-    for field in fields:
-        filed_id = field["field_id"]
-        field_values = field["values"]
-        field_type = field["field_type"]
-
-        if field_type == "multiselect":
-            field_values = [value["value"] for value in field_values]
-        else:
-            field_values = field["values"][0]["value"]
-
-        custom_fields.setdefault(filed_id, field_values)
+    custom_fields = get_model_custom_fields(data)
 
     return AuthorSchema(
         name=name,
@@ -135,7 +123,7 @@ class Author:
         return [get_author_from_dict(author) for author in response.json()["_embedded"]["contacts"]]
 
     @classmethod
-    async def create_author(cls, telegram_id, user_id, full_name, rating, team_lead) -> bool:
+    async def create_author(cls, telegram_id, user_id, full_name, rating, team_lead):
         """Создает нового автора"""
         first_name, last_name = full_name.split(" ")
         json_data = [
@@ -199,7 +187,7 @@ class Author:
         await cls._make_update_request(author_id, json_data)
 
     @classmethod
-    async def update_author_specialities(cls, author_id, specialities) -> bool:
+    async def update_author_specialities(cls, author_id, specialities):
         """Обновляет специальности автора"""
         json_data = {
             "custom_fields_values": [
