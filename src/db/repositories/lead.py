@@ -48,7 +48,7 @@ class LeadRepository(Repository):
 
     async def get_admin_urgent_list(self, team_lead):
         status_conditions = ["План", "Правки план", "В роботі"]
-        current_date = datetime.now() + timedelta(days=7)
+        current_date = datetime.now() + timedelta(days=3)
         stmt = (
             select(self.model)
             .where(
