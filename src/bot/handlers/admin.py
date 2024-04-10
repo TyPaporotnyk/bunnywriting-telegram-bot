@@ -121,7 +121,7 @@ async def author_deadlines(callback: types.CallbackQuery, session):
 
         leads_message = f"Автор: {author.custom_id}, {author.name}\n"
         for author_task in author_tasks:
-            leads_message += f"{author_task.id} - {author_task.real_deadline} - {author_task.status}\n"
+            leads_message += f"{author_task.id} - {author_task.deadline_for_author} - {author_task.status}\n"
 
         await callback.message.answer(leads_message)
 
