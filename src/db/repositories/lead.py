@@ -47,13 +47,12 @@ class LeadRepository(Repository):
         await self.session.commit()
 
     async def get_admin_urgent_list(self, team_lead):
-        status_conditions = ["План", "Правки план", "В роботі"]
-        current_date = datetime.now() + timedelta(days=3)
+        status_conditions = ["План", "Правки план", "В роботі", "Правки в роботі"]
         stmt = (
             select(self.model)
             .where(
                 (self.model.team_lead == team_lead)
-                & (self.model.deadline_for_author <= current_date)
+                # & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
                 & (self.model.status.in_(status_conditions))
             )
             .order_by(desc(self.model.deadline_for_author))
