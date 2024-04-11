@@ -47,19 +47,28 @@ class LeadRepository(Repository):
         await self.session.commit()
 
     async def get_admin_urgent_list(self, team_lead):
-        status_conditions = ["План", "Правки план", "В роботі", "Правки в роботі"]
+        status_conditions = ["План"]
+        stmt = (
+            select(self.model)
+            .where((self.model.team_lead == team_lead) & (self.model.status.in_(status_conditions)))
+            .order_by(desc(self.model.deadline_for_author))
+        )
+        result_first = (await self.session.execute(stmt)).scalars().all()
+
+        status_conditions = ["В роботі", "Правки в роботі"]
         stmt = (
             select(self.model)
             .where(
                 (self.model.team_lead == team_lead)
-                # & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
+                & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
                 & (self.model.status.in_(status_conditions))
             )
             .order_by(desc(self.model.deadline_for_author))
         )
 
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
+        second_result = (await self.session.execute(stmt)).scalars().all()
+
+        return second_result + result_first
 
     async def get_author_payments(self, team_lead, author_id):
         status_conditions = ["Робота відправлена", "Правки відправлено", "Не відправлено"]
