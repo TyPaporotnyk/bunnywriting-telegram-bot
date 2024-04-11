@@ -80,7 +80,7 @@ async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
 
         answer = await get_public_auction_answer(lead.id, author_id)
 
-        if answer in ["accept", "refuce"] or time >= 300:
+        if answer in ["accept", "refuce"] or time >= 600:
             break
 
         time += 5

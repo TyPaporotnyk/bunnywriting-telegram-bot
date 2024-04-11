@@ -43,6 +43,11 @@ async def get_urgent_list(session: AsyncSession, team_lead: int) -> List[Lead]:
     return await lead_repository.get_admin_urgent_list(team_lead=team_lead)
 
 
+async def get_author_payment_list(session: AsyncSession, team_lead, author_id) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_author_payments(team_lead=team_lead, author_id=author_id)
+
+
 async def load_crm_leads_to_db(leads: List[LeadSchema]):
     async with session_maker() as session:
         lead_repository = LeadRepository(session)

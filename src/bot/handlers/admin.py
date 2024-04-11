@@ -10,7 +10,12 @@ from src.crm.author import Author
 from src.crm.exceptions import AuthorNotCreated
 from src.db.services.admin import get_admin_author_ids, get_admin_authors
 from src.db.services.author import create_base_author
-from src.db.services.lead import get_current_author_payments, get_current_author_tasks, get_urgent_list
+from src.db.services.lead import (
+    get_author_payment_list,
+    get_current_author_payments,
+    get_current_author_tasks,
+    get_urgent_list,
+)
 from src.worker import send_user_messages_task
 
 router = Router(name="admin")
@@ -81,6 +86,9 @@ async def admin_mailing_message(message: types.Message, state: FSMContext, sessi
 
 @router.callback_query(F.data == "author_payments", IsAdmin())
 async def author_payments(callback: types.CallbackQuery, session):
+    """
+    Show all payment of an author
+    """
     admin_id = callback.from_user.id
     authors = await get_admin_authors(session, admin_id)
 
@@ -106,6 +114,9 @@ async def author_payments(callback: types.CallbackQuery, session):
 
 @router.callback_query(F.data == "author_deadlines", IsAdmin())
 async def author_deadlines(callback: types.CallbackQuery, session):
+    """
+    Show deadline lead list of authors
+    """
     admin_id = callback.from_user.id
     authors = await get_admin_authors(session, admin_id)
 
@@ -136,6 +147,62 @@ async def show_urgent_list(callback: types.CallbackQuery, session):
 
     message = ""
     for urgent in urgent_list:
-        message += f"{urgent.id}; {urgent.deadline_for_author}; {urgent.author_id}\n"
+        message += (
+            f"{urgent.id}; {urgent.deadline_for_author.strftime('%Y-%m-%d')}; {urgent.author_id} - {urgent.status}\n"
+        )
 
-    await callback.message.answer(message)
+    if message:
+        await callback.message.answer(message)
+    else:
+        await callback.answer("У вас немає заборгованості")
+
+
+@router.callback_query(F.data == "payment_list", IsAdmin())
+async def show_payment_list(callback: types.CallbackQuery, session):
+    """
+    Show the payment list of the authors
+    """
+    admin_id = callback.from_user.id
+    authors = await get_admin_authors(session, admin_id)
+
+    if not authors:
+        await callback.answer("У вас немає жодного автора")
+        return
+
+    message = ""
+
+    for author in authors:
+        author_payment_leads = await get_author_payment_list(session, admin_id, author.custom_id)
+
+        if not author_payment_leads:
+            continue
+
+        author_payment_sum = sum(
+            [
+                author_payment_lead.expenses
+                for author_payment_lead in author_payment_leads
+                if author_payment_lead.expenses is not None
+            ]
+        )
+        message += f"{author.id}; {author.card_number}\n"
+        message += f"Сума: {author_payment_sum} грн\n"
+        message += "Перелік робіт:\n"
+
+        for author_payment_lead in author_payment_leads:
+            message += f"{author_payment_lead.id}; {author_payment_lead.expenses}; {author_payment_lead.status}\n"
+
+        message += "-----------------\n"
+
+    if message:
+        await callback.message.answer(message)
+
+    else:
+        await callback.answer("У вас нема виплат для авторів")
+
+
+@router.callback_query(F.data == "salary", IsAdmin())
+async def admin_salary(callback: types.CallbackQuery, session):
+    """
+    Show the salary of the admin
+    """
+    await callback.message.answer("Сума: 0 грн")

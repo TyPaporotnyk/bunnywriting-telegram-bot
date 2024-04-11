@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import and_, desc, select, update
+from sqlalchemy import desc, select, update
 
 from src.db.models import Lead
 from src.db.repositories.abstract import Repository
@@ -57,6 +57,17 @@ class LeadRepository(Repository):
                 & (self.model.status.in_(status_conditions))
             )
             .order_by(desc(self.model.deadline_for_author))
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_author_payments(self, team_lead, author_id):
+        status_conditions = ["Робота відправлена", "Правки відправлено", "Не відправлено"]
+        stmt = select(self.model).where(
+            (self.model.team_lead == team_lead)
+            & (self.model.author_id == author_id)
+            & (self.model.status.in_(status_conditions))
         )
 
         result = await self.session.execute(stmt)
