@@ -80,3 +80,13 @@ class LeadRepository(Repository):
 
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def get_overdue_works(self):
+        stmt = (
+            select(self.model)
+            .where((self.model.real_deadline <= datetime.now()) & (self.model.status == "В роботі"))
+            .order_by(self.model.real_deadline)
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

@@ -48,6 +48,11 @@ async def get_author_payment_list(session: AsyncSession, team_lead, author_id) -
     return await lead_repository.get_author_payments(team_lead=team_lead, author_id=author_id)
 
 
+async def get_overdue_works(session: AsyncSession) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_overdue_works()
+
+
 async def load_crm_leads_to_db(leads: List[LeadSchema]):
     async with session_maker() as session:
         lead_repository = LeadRepository(session)
