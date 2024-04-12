@@ -8,6 +8,7 @@ from src.bot.keyboards.admin import get_start_keyboard
 from src.bot.states.admin import MailingFormState, UserFormState
 from src.crm.author import Author
 from src.crm.exceptions import AuthorNotCreated
+from src.db import Lead
 from src.db.services.admin import get_admin_author_ids, get_admin_authors
 from src.db.services.author import create_base_author
 from src.db.services.lead import (
@@ -137,6 +138,17 @@ async def author_deadlines(callback: types.CallbackQuery, session):
         await callback.message.answer(leads_message)
 
 
+def get_typed_leads(leads: list[Lead]) -> dict[str, list[Lead]]:
+    urgent_list_typed = {}
+    for urgent in leads:
+        if urgent.status not in urgent_list_typed:
+            urgent_list_typed[urgent.status] = []
+
+        urgent_list_typed[urgent.status].append(urgent)
+
+    return urgent_list_typed
+
+
 @router.callback_query(F.data == "urgent_list", IsAdmin())
 async def show_urgent_list(callback: types.CallbackQuery, session):
     """
@@ -145,16 +157,18 @@ async def show_urgent_list(callback: types.CallbackQuery, session):
     admin_id = callback.from_user.id
     urgent_list = await get_urgent_list(session, admin_id)
 
-    message = ""
-    for urgent in urgent_list:
-        message += (
-            f"{urgent.id}; {urgent.deadline_for_author.strftime('%Y-%m-%d')}; {urgent.author_id} - {urgent.status}\n"
-        )
+    urgent_list_typed = get_typed_leads(urgent_list)
 
-    if message:
+    for urgent_status in urgent_list_typed:
+        message = ""
+
+        for urgent in urgent_list_typed[urgent_status]:
+            message += (
+                f"{urgent.id}; {urgent.deadline_for_author.strftime('%Y-%m-%d')};"
+                f" {urgent.author_id} - {urgent.status}\n"
+            )
+
         await callback.message.answer(message)
-    else:
-        await callback.answer("У вас немає заборгованості")
 
 
 @router.callback_query(F.data == "payment_list", IsAdmin())
