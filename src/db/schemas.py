@@ -45,7 +45,7 @@ class LeadSchema(BaseModel):
     pages: Optional[str]
     thema: Optional[str]
     uniqueness: Optional[str]
-    real_deadline: Optional[str]
+    real_deadline: Optional[datetime]
     deadline_for_author: Optional[datetime]
     files: Optional[str]
     fix_time: Optional[int]

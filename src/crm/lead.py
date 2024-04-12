@@ -64,7 +64,7 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         pages=custom_fields.get(254900),
         thema=custom_fields.get(254902),
         uniqueness=custom_fields.get(254904),
-        real_deadline=custom_fields.get(254906),
+        real_deadline=custom_fields.get(1112852),
         deadline_for_author=custom_fields.get(1110826),
         files=custom_fields.get(254910),
         fix_time=custom_fields.get(254964),

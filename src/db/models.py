@@ -36,7 +36,7 @@ class Lead(Base):
     pages = Column(Text)
     thema = Column(Text)
     uniqueness = Column(String(256))
-    real_deadline = Column(String(256))
+    real_deadline = Column(DateTime)
     deadline_for_author = Column(DateTime)
     files = Column(String(256))
     fix_time = Column(BigInteger)
