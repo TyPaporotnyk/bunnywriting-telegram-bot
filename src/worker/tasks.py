@@ -6,15 +6,15 @@ from src.auction.find import find_auction_authors, find_private_auction_authors
 from src.bot.misc import bot
 from src.bot.services.broadcaster import broadcast
 from src.worker.celery import app
-from src.worker.dump import dump
+from src.dump import dump
 
 logger = logging.getLogger(__name__)
 
 
 @app.task
-def send_user_messages_task(author_ids: List[int], messsage: str):
+def send_user_messages_task(author_ids: List[int], message: str):
     celery_event_loop = asyncio.get_event_loop()
-    celery_event_loop.run_until_complete(broadcast(bot, author_ids, messsage))
+    celery_event_loop.run_until_complete(broadcast(bot, author_ids, message))
 
 
 @app.task
