@@ -14,6 +14,6 @@ def get_start_keyboard():
         InlineKeyboardButton(text="⏰Дедлайни авторів", callback_data="author_deadlines"),
         InlineKeyboardButton(text="💥Список термінових", callback_data="urgent_list"),
     )
-    help_buttons.row(InlineKeyboardButton(text="Місячна ЗП (Тест)", callback_data="salary"))
+    help_buttons.row(InlineKeyboardButton(text="Місячна ЗП", callback_data="salary"))
 
     return help_buttons

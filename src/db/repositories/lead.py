@@ -90,3 +90,21 @@ class LeadRepository(Repository):
 
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def get_admin_salary(self, team_lead):
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        end_of_month = datetime(now.year, now.month + 1, 1) - timedelta(days=1)
+
+        stmt = (
+            select(self.model)
+            .where(
+                (self.model.ready_date >= start_of_month)
+                & (self.model.ready_date <= end_of_month)
+                & (self.model.team_lead == team_lead)
+            )
+            .order_by(self.model.real_deadline)
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

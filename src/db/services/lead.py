@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,26 +19,6 @@ async def get_current_author_payments(session, author_id) -> List[Lead]:
     return await lead_repository.get_current_author_payments(author_id)
 
 
-async def get_deadlined_author_tasks(session, author_id) -> List[Lead]:
-    lead_repository = LeadRepository(session)
-    return await lead_repository.get_deadlined_author_tasks(author_id)
-
-
-async def get_leads_by_status(session, status) -> List[Lead]:
-    lead_repository = LeadRepository(session)
-    return await lead_repository.get_leads_by_status(status)
-
-
-async def update_lead_priority(session, lead_id, priority):
-    lead_repository = LeadRepository(session)
-    return await lead_repository.update_lead_priority(lead_id, priority)
-
-
-async def update_lead_alert_comment(session, lead_id, alert_comment: str):
-    lead_repository = LeadRepository(session)
-    return await lead_repository.update_lead_alert_comment(lead_id, alert_comment)
-
-
 async def get_urgent_list(session: AsyncSession, team_lead: int) -> List[Lead]:
     lead_repository = LeadRepository(session)
     return await lead_repository.get_admin_urgent_list(team_lead=team_lead)
@@ -53,18 +34,29 @@ async def get_overdue_works(session: AsyncSession) -> List[Lead]:
     return await lead_repository.get_overdue_works()
 
 
+async def get_admin_salary(session: AsyncSession, team_lead: int) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_admin_salary(team_lead)
+
+
 async def load_crm_leads_to_db(leads: List[LeadSchema]):
     async with session_maker() as session:
         lead_repository = LeadRepository(session)
 
         for lead in leads:
-            lead = lead.model_dump()
+            lead = lead.model_dump(exclude_unset=True)
+            del lead["ready_date"]
 
-            lead_db = await lead_repository.get(id=lead["id"])
+            lead_db: Lead = await lead_repository.get(id=lead["id"])
 
             if lead_db:
                 for key, value in lead.items():
                     setattr(lead_db, key, value)
+
+                if lead_db.ready_date is None and lead_db.status in ["Робота відправлена", "Готово"]:
+                    # lead_db.ready_date = lead_db.updated_at
+                    lead_db.ready_date = datetime.now()
+
             else:
                 await lead_repository.create(lead)
 

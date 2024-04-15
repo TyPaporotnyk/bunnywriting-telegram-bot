@@ -73,6 +73,7 @@ class LeadSchema(BaseModel):
     date_current: Optional[int]
     hotovo: Optional[str]
     redone_date: Optional[int]
+    ready_date: Optional[datetime]
 
     def __hash__(self) -> int:
         return self.id

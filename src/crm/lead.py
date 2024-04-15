@@ -92,6 +92,7 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         date_current=custom_fields.get(1112854),
         hotovo=custom_fields.get(1112846),
         redone_date=custom_fields.get(1116123),
+        ready_date=None
     )
 
 

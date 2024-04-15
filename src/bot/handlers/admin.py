@@ -16,6 +16,7 @@ from src.db.services.lead import (
     get_current_author_payments,
     get_current_author_tasks,
     get_urgent_list,
+    get_admin_salary,
 )
 from src.worker import send_user_messages_task
 
@@ -219,4 +220,12 @@ async def admin_salary(callback: types.CallbackQuery, session):
     """
     Show the salary of the admin
     """
-    await callback.message.answer("Сума: 0 грн")
+    admin_id = callback.from_user.id
+    salary_leads = await get_admin_salary(session, admin_id)
+    work_type_price = {
+        "Курсова": 100,
+        "Дипломна": 150,
+        "Магістерська": 200,
+    }
+    salary_sum = 2500 + sum([work_type_price.get(salary_lead.work_type, 100) for salary_lead in salary_leads])
+    await callback.message.answer(f"Сума: {salary_sum} грн")
