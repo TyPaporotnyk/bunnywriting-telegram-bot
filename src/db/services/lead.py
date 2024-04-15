@@ -54,8 +54,7 @@ async def load_crm_leads_to_db(leads: List[LeadSchema]):
                     setattr(lead_db, key, value)
 
                 if lead_db.ready_date is None and lead_db.status in ["Робота відправлена", "Готово"]:
-                    # lead_db.ready_date = lead_db.updated_at
-                    lead_db.ready_date = datetime.now()
+                    lead_db.ready_date = lead_db.updated_at
 
             else:
                 await lead_repository.create(lead)
