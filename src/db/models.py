@@ -66,6 +66,7 @@ class Lead(Base):
     date_current = Column(BigInteger)
     hotovo = Column(String(256))
     redone_date = Column(BigInteger)
+    ready_date = Column(DateTime)
 
 
 class Speciality(Base):
