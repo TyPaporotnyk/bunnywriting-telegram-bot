@@ -10,4 +10,4 @@ class MailingFormState(StatesGroup):
 
 
 class UrgentStates(StatesGroup):
-    get_list_type = State()
+    get_author_id = State()

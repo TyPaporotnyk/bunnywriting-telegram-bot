@@ -8,6 +8,9 @@ def get_start_keyboard():
     help_buttons.add(InlineKeyboardButton(text="💰Виплати", callback_data="author_payment"))
     help_buttons.add(InlineKeyboardButton(text="🎓Змінити спеціальності", callback_data="change_specialities"))
     help_buttons.add(InlineKeyboardButton(text="🛠Змінити планову навантаженість", callback_data="change_busyness"))
+    help_buttons.add(
+        InlineKeyboardButton(text="💥Список термінових", callback_data="author_urgent_list"),
+    )
     help_buttons.adjust(1)
     return help_buttons
 

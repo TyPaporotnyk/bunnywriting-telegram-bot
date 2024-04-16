@@ -6,15 +6,16 @@ from loguru import logger
 from src.bot.filters.user import IsAuthor, IsNotRegisteredAuthor
 from src.bot.keyboards.author import answer_speciality, get_start_keyboard
 from src.bot.services.redis import get_public_auction_answer, set_public_auction_answer
-from src.bot.states.author import ChangeBussinessState, ChangeSpecialityState, MoneyState, RgisterFormState
+from src.bot.states.author import ChangeBussinessState, ChangeSpecialityState, MoneyState, RegisterFormState
 from src.crm.author import Author
+from src.db import Lead
 from src.db.services.author import (
     db_register_author,
     get_author_by_telegram_id,
     update_author_plane_busyness,
     update_author_specialities,
 )
-from src.db.services.lead import get_current_author_payments, get_current_author_tasks
+from src.db.services.lead import get_author_urgent_list, get_current_author_payments, get_current_author_tasks
 from src.db.services.speciality import get_specialities
 
 router = Router(name="commands")
@@ -25,10 +26,10 @@ async def register_author(message: types.Message, state: FSMContext):
     await message.reply(
         "Привіт! 👋\nНадішли мені номер своєї карти, бажано приват універсальну (тільки не для виплат)💳"
     )
-    await state.set_state(RgisterFormState.get_card)
+    await state.set_state(RegisterFormState.get_card)
 
 
-@router.message(F.text, RgisterFormState.get_card)
+@router.message(F.text, RegisterFormState.get_card)
 async def admin_start(message: types.Message, state: FSMContext, session):
     await state.update_data(get_card=message.text)
     specialities = await get_specialities(session)
@@ -36,10 +37,10 @@ async def admin_start(message: types.Message, state: FSMContext, session):
         'Чудово! 👍 Вкажи перелік спеціальностей, які тебе цікавлять та натисни кнопку "✅Готово"',
         reply_markup=answer_speciality(specialities).as_markup(resize_keyboard=True),
     )
-    await state.set_state(RgisterFormState.get_specialities)
+    await state.set_state(RegisterFormState.get_specialities)
 
 
-@router.message(RgisterFormState.get_specialities)
+@router.message(RegisterFormState.get_specialities)
 async def admin_start_register(message: types.Message, state: FSMContext, session):
     input_message = message.text
     author_id = message.from_user.id
@@ -281,3 +282,39 @@ async def author_success_set_money(message: types.Message, state: FSMContext):
     logger.info(f'Автор {message.from_user.id} вытсавил цену {message.text} за задание {data["lead_id"]}')
     await message.reply("⚖️Ставку прийнято! Ти отримаєш сповіщення, якщо твоя ставка виграє.")
     await state.clear()
+
+
+def get_typed_leads(leads: list[Lead]) -> dict[str, list[Lead]]:
+    urgent_list_typed = {}
+    for urgent in leads:
+        if urgent.status not in urgent_list_typed:
+            urgent_list_typed[urgent.status] = []
+
+        urgent_list_typed[urgent.status].append(urgent)
+
+    return urgent_list_typed
+
+
+@router.callback_query(F.data == "author_urgent_list", IsAuthor())
+async def show_urgent_list(callback: types.CallbackQuery, session):
+    """
+    Show the urgent list of the authors
+    """
+    author_id = callback.from_user.id
+
+    author = await get_author_by_telegram_id(session, author_id)
+
+    urgent_list = await get_author_urgent_list(session, author.custom_id)
+
+    if not urgent_list:
+        await callback.message.answer("У вас немає списку термінових завдань")
+
+    urgent_list_typed = get_typed_leads(urgent_list)
+
+    for urgent_status in urgent_list_typed:
+        message = f"Список термінових робіт за статусом {urgent_status}:\n"
+
+        for urgent in urgent_list_typed[urgent_status]:
+            message += f"{urgent.id}; {urgent.deadline_for_author.strftime('%m-%d')}\n"
+
+        await callback.message.answer(message)

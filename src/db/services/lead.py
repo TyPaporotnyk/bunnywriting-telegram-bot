@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,9 +18,14 @@ async def get_current_author_payments(session, author_id) -> List[Lead]:
     return await lead_repository.get_current_author_payments(author_id)
 
 
-async def get_urgent_list(session: AsyncSession, team_lead: int) -> List[Lead]:
+async def get_urgent_list(session: AsyncSession, team_lead: int, author_id: int) -> List[Lead]:
     lead_repository = LeadRepository(session)
-    return await lead_repository.get_admin_urgent_list(team_lead=team_lead)
+    return await lead_repository.get_admin_urgent_list(team_lead=team_lead, author_id=author_id)
+
+
+async def get_author_urgent_list(session: AsyncSession, author_id: int) -> List[Lead]:
+    lead_repository = LeadRepository(session)
+    return await lead_repository.get_author_urgent_list(author_id=author_id)
 
 
 async def get_author_payment_list(session: AsyncSession, team_lead, author_id) -> List[Lead]:
