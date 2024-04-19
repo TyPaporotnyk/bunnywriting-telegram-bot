@@ -18,7 +18,7 @@ async def get_current_author_payments(session, author_id) -> List[Lead]:
     return await lead_repository.get_current_author_payments(author_id)
 
 
-async def get_urgent_list(session: AsyncSession, team_lead: int, author_id: int) -> List[Lead]:
+async def get_urgent_list(session: AsyncSession, team_lead: int, author_id: int | None = None) -> List[Lead]:
     lead_repository = LeadRepository(session)
     return await lead_repository.get_admin_urgent_list(team_lead=team_lead, author_id=author_id)
 

@@ -1,5 +1,6 @@
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
+from loguru import logger
 
 from src.bot.filters.admin import IsAdmin
 from src.bot.states.admin import UrgentStates
@@ -21,6 +22,30 @@ def get_typed_leads(leads: list[Lead]) -> dict[str, list[Lead]]:
 
 
 @router.callback_query(F.data == "urgent_list", IsAdmin())
+async def show_urgent_list_by_author_id(callback: types.CallbackQuery, session):
+    """
+    Show the urgent list of the authors
+    """
+    admin_id = callback.from_user.id
+    urgent_list = await get_urgent_list(session, admin_id)
+
+    logger.info("Test")
+
+    if not urgent_list:
+        await callback.answer("У вас нема списку термінових робіт")
+
+    urgent_list_typed = get_typed_leads(urgent_list)
+
+    for urgent_status in urgent_list_typed:
+        message_template = f"Список термінових робіт за статусом {urgent_status}:\n"
+
+        for urgent in urgent_list_typed[urgent_status]:
+            message_template += f"{urgent.id}; {urgent.deadline_for_author.strftime('%m-%d')}\n"
+
+        await callback.message.answer(message_template)
+
+
+@router.callback_query(F.data == "urgent_list_by_author", IsAdmin())
 async def get_author_id_for_urgent_list(callback: types.CallbackQuery, state: FSMContext):
     """
     Enter author id to get them urgent list
@@ -46,7 +71,7 @@ async def wrong_author_id_for_urgent_list(message: types.Message):
 
 
 @router.message(F.text, UrgentStates.get_author_id)
-async def show_urgent_list_by_author_id(message: types.Message, state: FSMContext, session):
+async def show_urgent_list(message: types.Message, state: FSMContext, session):
     """
     Show the urgent list of the authors
     """

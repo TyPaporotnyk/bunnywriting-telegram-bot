@@ -46,33 +46,57 @@ class LeadRepository(Repository):
         await self.session.execute(stmt)
         await self.session.commit()
 
-    async def get_admin_urgent_list(self, team_lead, author_id):
-        status_conditions = ["План"]
-        stmt = (
-            select(self.model)
-            .where(
-                (self.model.team_lead == team_lead)
-                & (self.model.status.in_(status_conditions) & (self.model.author_id == author_id))
+    async def get_admin_urgent_list(self, team_lead, author_id: int | None = None):
+        if author_id:
+            status_conditions = ["План"]
+            stmt = (
+                select(self.model)
+                .where(
+                    (self.model.team_lead == team_lead)
+                    & (self.model.status.in_(status_conditions) & (self.model.author_id == author_id))
+                )
+                .order_by(desc(self.model.deadline_for_author))
             )
-            .order_by(desc(self.model.deadline_for_author))
-        )
-        result_first = (await self.session.execute(stmt)).scalars().all()
+            result_first = (await self.session.execute(stmt)).scalars().all()
 
-        status_conditions = ["В роботі", "Правки в роботі"]
-        stmt = (
-            select(self.model)
-            .where(
-                (self.model.team_lead == team_lead)
-                & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
-                & (self.model.status.in_(status_conditions))
-                & (self.model.author_id == author_id)
+            status_conditions = ["В роботі", "Правки в роботі"]
+            stmt = (
+                select(self.model)
+                .where(
+                    (self.model.team_lead == team_lead)
+                    & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
+                    & (self.model.status.in_(status_conditions))
+                    & (self.model.author_id == author_id)
+                )
+                .order_by(desc(self.model.deadline_for_author))
             )
-            .order_by(desc(self.model.deadline_for_author))
-        )
 
-        second_result = (await self.session.execute(stmt)).scalars().all()
+            second_result = (await self.session.execute(stmt)).scalars().all()
 
-        return second_result + result_first
+            return second_result + result_first
+        else:
+            status_conditions = ["План"]
+            stmt = (
+                select(self.model)
+                .where((self.model.team_lead == team_lead) & (self.model.status.in_(status_conditions)))
+                .order_by(desc(self.model.deadline_for_author))
+            )
+            result_first = (await self.session.execute(stmt)).scalars().all()
+
+            status_conditions = ["В роботі", "Правки в роботі"]
+            stmt = (
+                select(self.model)
+                .where(
+                    (self.model.team_lead == team_lead)
+                    & (self.model.deadline_for_author <= datetime.now() + timedelta(days=3))
+                    & (self.model.status.in_(status_conditions))
+                )
+                .order_by(desc(self.model.deadline_for_author))
+            )
+
+            second_result = (await self.session.execute(stmt)).scalars().all()
+
+            return second_result + result_first
 
     async def get_author_urgent_list(self, author_id):
         status_conditions = ["План"]

@@ -10,10 +10,12 @@ def get_start_keyboard():
         InlineKeyboardButton(text="💸Виплати авторам", callback_data="author_payments"),
         InlineKeyboardButton(text="💰Список виплат", callback_data="payment_list"),
     )
+    help_buttons.row(InlineKeyboardButton(text="⏰Дедлайни авторів", callback_data="author_deadlines"))
+    help_buttons.row(InlineKeyboardButton(text="💥Список термінових", callback_data="urgent_list"))
     help_buttons.row(
-        InlineKeyboardButton(text="⏰Дедлайни авторів", callback_data="author_deadlines"),
-        InlineKeyboardButton(text="💥Список термінових", callback_data="urgent_list"),
+        InlineKeyboardButton(text="💥Список термінових за автором", callback_data="urgent_list_by_author")
     )
+
     help_buttons.row(InlineKeyboardButton(text="Місячна ЗП", callback_data="salary"))
 
     return help_buttons
