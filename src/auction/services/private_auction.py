@@ -4,14 +4,11 @@ from typing import List
 from aiogram import types
 from loguru import logger
 
+from src.auction.utils import wait_private_auction_answer
 from src.bot.keyboards.author import mailing_buttons
 from src.bot.misc import bot
 from src.bot.services.broadcaster import broadcast, send_message
-from src.bot.services.redis import (
-    delete_action,
-    get_lead_answers,
-    set_public_auction_answer,
-)
+from src.bot.services.redis import delete_action, get_lead_answers, set_public_auction_answer
 from src.crm.author import Author
 from src.crm.lead import Lead
 from src.db.schemas import LeadSchema
@@ -58,7 +55,18 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
     await send_private_auction_messages(author_ids, lead)
 
     # Ждет пока авторы успеют дать свои ответы
-    await asyncio.sleep(1800)
+    answer = await wait_private_auction_answer(lead)
+
+    if answer == "closed":
+        await delete_action(lead.id)
+        await broadcast(
+            bot,
+            author_ids,
+            f"Менеджер віддав завдання {lead.id} іншому автору",
+            keyboard=types.ReplyKeyboardRemove(),
+        )
+
+        return True, lead
 
     # Получаем результаты аукциона и отправляем сообщения победителям
     author_rates = await get_lead_answers(lead.id)
@@ -67,7 +75,6 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
         (author_id, author_rates[author_id]) for author_id in author_rates if author_rates[author_id].isdigit()
     ]
     author_ids_with_prices = sorted(author_ids_with_prices, key=lambda s: int(s[1]))
-    logger.debug(author_ids_with_prices)
 
     flag = False
 

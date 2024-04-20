@@ -3,11 +3,7 @@ from typing import List, Optional
 
 from loguru import logger
 
-from src.bot.services.redis import (
-    delete_action,
-    get_public_auction_answer,
-    set_public_auction_answer,
-)
+from src.bot.services.redis import delete_action, get_public_auction_answer, set_public_auction_answer
 from src.crm.lead import Lead, statuses
 from src.db.schemas import LeadSchema
 
@@ -26,6 +22,12 @@ async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
     while True:
         await asyncio.sleep(5)
 
+        is_closed = not (await check_lead_status(lead))
+
+        if is_closed:
+            answer = "closed"
+            break
+
         answer = await get_public_auction_answer(lead.id, author_id)
 
         if answer in ["accept", "refuce"] or time >= 600:
@@ -34,6 +36,27 @@ async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
         time += 5
 
     await delete_action(lead.id)
+    return answer
+
+
+async def wait_private_auction_answer(lead: LeadSchema) -> str:
+    time = 0
+
+    while True:
+        await asyncio.sleep(5)
+
+        is_closed = not (await check_lead_status(lead))
+
+        if is_closed:
+            answer = "closed"
+            break
+
+        if time >= 1800:
+            answer = "finish"
+            break
+
+        time += 5
+
     return answer
 
 

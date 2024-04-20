@@ -48,7 +48,17 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
         if await send_auction_message(author.telegram_id, lead):
             answer = await wait_auction_answer(lead, author.telegram_id)
 
-            if answer == "accept":
+            if answer == "closed":
+                logger.info(f"Менеджер віддав завдання {lead.id} іншому автору")
+                flag = True
+                await send_message(
+                    bot,
+                    author.telegram_id,
+                    f"Менеджер віддав завдання {lead.id} іншому автору",
+                    keyboard=types.ReplyKeyboardRemove(),
+                )
+                break
+            elif answer == "accept":
                 open_leads = author.open_leads + 1
                 busyness = author.busyness + lead.koef
 
