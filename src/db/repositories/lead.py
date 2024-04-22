@@ -123,7 +123,7 @@ class LeadRepository(Repository):
         return second_result + result_first
 
     async def get_author_payments(self, team_lead, author_id):
-        status_conditions = ["Робота відправлена", "Правки відправлено", "Не відправлено"]
+        status_conditions = ["Робота відправлена", "Правки", "Правки в роботі", "Правки відправлено", "Не відправлено"]
         stmt = select(self.model).where(
             (self.model.team_lead == team_lead)
             & (self.model.expenses_status != 100)

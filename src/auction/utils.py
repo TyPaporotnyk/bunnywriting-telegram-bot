@@ -20,20 +20,14 @@ async def wait_auction_answer(lead: LeadSchema, author_id) -> Optional[str]:
     await delete_action(lead.id)
     await set_public_auction_answer(lead.id, author_id, "wait")
     while True:
-        await asyncio.sleep(10)
-
-        is_closed = not (await check_lead_status(lead))
-
-        if is_closed:
-            answer = "closed"
-            break
+        await asyncio.sleep(5)
 
         answer = await get_public_auction_answer(lead.id, author_id)
 
         if answer in ["accept", "refuce"] or time >= 600:
             break
 
-        time += 10
+        time += 5
 
     await delete_action(lead.id)
     return answer
@@ -43,19 +37,13 @@ async def wait_private_auction_answer(lead: LeadSchema) -> str:
     time = 0
 
     while True:
-        await asyncio.sleep(20)
-
-        is_closed = not (await check_lead_status(lead))
-
-        if is_closed:
-            answer = "closed"
-            break
+        await asyncio.sleep(5)
 
         if time >= 1800:
             answer = "finish"
             break
 
-        time += 20
+        time += 5
 
     return answer
 
