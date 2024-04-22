@@ -59,6 +59,9 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
                 )
                 break
             elif answer == "accept":
+                if author.open_leads is None:
+                    author.open_leads = 0
+
                 open_leads = author.open_leads + 1
                 busyness = author.busyness + lead.koef
 

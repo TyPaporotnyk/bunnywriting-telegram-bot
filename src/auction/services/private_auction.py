@@ -85,6 +85,8 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
 
         # Получаем автора по его айди из уже готового списка авторов
         author = [author for author in authors if author.telegram_id == int(author_id)][0]
+        if author.open_leads is None:
+            author.open_leads = 0
 
         open_leads = author.open_leads + 1
         busyness = author.busyness + lead.koef
