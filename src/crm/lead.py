@@ -30,7 +30,7 @@ statuses = {
     56532679: "Правки",
     56532683: "Правки в роботі",
     56530895: "Правки відправлено",
-    54897359: "Не відправлено",
+    56532687: "Не відправлено",
     53018639: "Готово",
 }
 
@@ -92,7 +92,7 @@ def get_lead_from_dict(data: dict) -> LeadSchema:
         date_current=custom_fields.get(1112854),
         hotovo=custom_fields.get(1112846),
         redone_date=custom_fields.get(1116123),
-        ready_date=None
+        ready_date=None,
     )
 
 
