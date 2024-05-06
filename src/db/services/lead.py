@@ -48,7 +48,7 @@ async def load_crm_leads_to_db(leads: List[LeadSchema]):
         lead_repository = LeadRepository(session)
 
         for lead in leads:
-            lead = lead.model_dump(exclude_unset=True)
+            lead = lead.model_dump()
             del lead["ready_date"]
 
             lead_db: Lead = await lead_repository.get(id=lead["id"])
