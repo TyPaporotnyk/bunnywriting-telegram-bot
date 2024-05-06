@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Table, Text, func
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -35,7 +35,7 @@ class Lead(Base):
     koef = Column(Float)
     pages = Column(Text)
     thema = Column(Text)
-    uniqueness = Column(String(256))
+    uniqueness = Column(Text)
     real_deadline = Column(DateTime)
     deadline_for_author = Column(DateTime)
     files = Column(String(256))
