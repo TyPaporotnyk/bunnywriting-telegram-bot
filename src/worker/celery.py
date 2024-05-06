@@ -8,7 +8,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     "dump-crm-models-task": {
         "task": "src.worker.tasks.dump_crm_data_task",
-        "schedule": crontab(minute="*/5"),
+        "schedule": crontab(minute="*/10"),
     },
     "send-team-leads-alerts-task": {
         "task": "src.worker.tasks.send_team_leads_alerts_task",
