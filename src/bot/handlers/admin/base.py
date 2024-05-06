@@ -96,7 +96,7 @@ async def show_payment_list(callback: types.CallbackQuery, session):
             [
                 (
                     author_payment_lead.expenses
-                    if author_payment_lead.expenses_status == 0
+                    if author_payment_lead.expenses_status in [0, None]
                     else author_payment_lead.expenses / 2
                 )
                 for author_payment_lead in author_payment_leads

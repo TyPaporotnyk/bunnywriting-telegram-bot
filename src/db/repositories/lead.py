@@ -128,7 +128,6 @@ class LeadRepository(Repository):
             "Робота відправлена",
             "Правки",
             "Правки в роботі",
-            # "Правки відправлено",
             "Не відправлено",
         ]
         stmt = select(self.model).where(

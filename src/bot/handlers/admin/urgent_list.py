@@ -29,8 +29,6 @@ async def show_urgent_list_by_author_id(callback: types.CallbackQuery, session):
     admin_id = callback.from_user.id
     urgent_list = await get_urgent_list(session, admin_id)
 
-    logger.info("Test")
-
     if not urgent_list:
         await callback.answer("У вас нема списку термінових робіт")
 
