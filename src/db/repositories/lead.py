@@ -132,7 +132,6 @@ class LeadRepository(Repository):
         ]
         stmt = select(self.model).where(
             (self.model.team_lead == team_lead)
-            & (self.model.expenses_status != 100)
             & (self.model.author_id == author_id)
             & (self.model.status.in_(status_conditions))
         )

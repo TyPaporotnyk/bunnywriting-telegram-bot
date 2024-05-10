@@ -77,7 +77,8 @@ async def show_payment_list(callback: types.CallbackQuery, session):
     """
     Show the payment list of the authors
     """
-    admin_id = callback.from_user.id
+    # admin_id = callback.from_user.id
+    admin_id = 6414134198
     authors = await get_admin_authors(session, admin_id)
 
     if not authors:
@@ -88,6 +89,7 @@ async def show_payment_list(callback: types.CallbackQuery, session):
 
     for author in authors:
         author_payment_leads = await get_author_payment_list(session, admin_id, author.custom_id)
+        author_payment_leads = list(filter(lambda x: x.expenses_status != 100, author_payment_leads))
 
         if not author_payment_leads:
             continue
