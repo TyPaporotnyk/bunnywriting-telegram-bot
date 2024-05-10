@@ -113,7 +113,9 @@ async def show_payment_list(callback: types.CallbackQuery, session):
         message += "-----------------\n"
 
     if message:
-        await callback.message.answer(message)
+        msgs = [message[i : i + 4096] for i in range(0, len(message), 4096)]
+        for text in msgs:
+            await callback.message.answer(text)
 
     else:
         await callback.answer("У вас нема виплат для авторів")
