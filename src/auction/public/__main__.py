@@ -1,23 +1,23 @@
 import asyncio
-from datetime import time, datetime, timedelta
+from datetime import datetime, time, timedelta
 
 from loguru import logger
 
-from src.bot.utils import logging
 from src.auction.services import public_autction
 from src.auction.utils import group_leads_by_work_type, update_lead_status
+from src.bot.utils import logging
 from src.crm.lead import Lead
 
 
 async def find_auction_authors():
-    logger.info("Начало поиска авторов на публичные проекты")
+    logger.info("РќР°С‡Р°Р»Рѕ РїРѕРёСЃРєР° Р°РІС‚РѕСЂРѕРІ РЅР° РїСѓР±Р»РёС‡РЅС‹Рµ РїСЂРѕРµРєС‚С‹")
 
     leads = await Lead.get_leads_by_status(53018603)
     leads = list(filter(lambda x: x.speciality is not None, leads))
-    logger.info(f"Получено {len(leads)} публичных проектов")
+    logger.info(f"РџРѕР»СѓС‡РµРЅРѕ {len(leads)} РїСѓР±Р»РёС‡РЅС‹С… РїСЂРѕРµРєС‚РѕРІ")
     if leads:
         grouped_leads = group_leads_by_work_type(leads)
-        logger.info(f"Получено {len(leads)} публичных проектов сгруппированных по типу работы")
+        logger.info(f"РџРѕР»СѓС‡РµРЅРѕ {len(leads)} РїСѓР±Р»РёС‡РЅС‹С… РїСЂРѕРµРєС‚РѕРІ СЃРіСЂСѓРїРїРёСЂРѕРІР°РЅРЅС‹С… РїРѕ С‚РёРїСѓ СЂР°Р±РѕС‚С‹")
 
         tasks = [
             public_autction.find_authors(grouped_leads[work][0], delay) for delay, work in enumerate(grouped_leads)

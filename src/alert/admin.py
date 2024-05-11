@@ -2,7 +2,7 @@ from loguru import logger
 
 from src.bot.misc import bot
 from src.bot.services.broadcaster import send_message
-from src.db import session_maker, Lead
+from src.db import Lead, session_maker
 from src.db.services.lead import get_overdue_works
 
 
