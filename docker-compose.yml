@@ -18,17 +18,31 @@ services:
     depends_on:
       - redis
 
-  auction:
+  public-auction:
     extends:
       service: common
-    command: poetry run python -m src.auction
+    command: poetry run python -m src.auction.public
+    depends_on:
+      - redis
+
+  private-auction:
+    extends:
+      service: common
+    command: poetry run python -m src.auction.private
     depends_on:
       - redis
 
   celery:
     extends:
       service: common
-    command: poetry run celery -A src.worker worker -l INFO --beat
+    command: poetry run celery -A src.worker worker -l INFO
+    depends_on:
+      - redis
+
+  celery-beat:
+    extends:
+      service: common
+    command: poetry run celery -A src.worker beat -l INFO
     depends_on:
       - redis
 

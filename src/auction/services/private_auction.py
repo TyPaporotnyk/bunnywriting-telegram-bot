@@ -4,7 +4,6 @@ from typing import List
 from aiogram import types
 from loguru import logger
 
-from src.auction.utils import wait_private_auction_answer
 from src.bot.keyboards.author import mailing_buttons
 from src.bot.misc import bot
 from src.bot.services.broadcaster import broadcast, send_message
@@ -47,7 +46,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
     if not authors:
         return False, lead
 
-    # Получаем id авторов и рассылаем им всем прикглащение на участие
+    # Получаем id авторов и рассылаем им всем приглашение на участие
     author_ids = [author.telegram_id for author in authors]
     await delete_action(lead.id)
     for author_id in author_ids:
@@ -55,18 +54,7 @@ async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSche
     await send_private_auction_messages(author_ids, lead)
 
     # Ждет пока авторы успеют дать свои ответы
-    answer = await wait_private_auction_answer(lead)
-
-    if answer == "closed":
-        await delete_action(lead.id)
-        await broadcast(
-            bot,
-            author_ids,
-            f"Менеджер віддав завдання {lead.id} іншому автору",
-            keyboard=types.ReplyKeyboardRemove(),
-        )
-
-        return True, lead
+    await asyncio.sleep(1800)
 
     # Получаем результаты аукциона и отправляем сообщения победителям
     author_rates = await get_lead_answers(lead.id)

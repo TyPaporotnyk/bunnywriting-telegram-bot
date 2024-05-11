@@ -1,5 +1,4 @@
 import asyncio
-from typing import List, Optional
 
 from aiogram import types
 from loguru import logger
@@ -39,49 +38,48 @@ async def send_auction_message(author_id: int, lead: LeadSchema):
 
 async def find_authors(lead: LeadSchema, delay: int = 0) -> tuple[bool, LeadSchema]:
     await asyncio.sleep(delay)
+    logger.info(f"Публичная раздача проекта {lead.id} запустилась")
 
     authors = await get_not_busyness_authors(lead.koef, lead.speciality)
-    logger.info(f"Deal {lead.id} has {len(authors)} authors")
+    logger.info(f"На публичную раздачу проекта {lead.id} нашлось {len(authors)} авторов")
 
-    flag = False
+    is_auction_changed = False
     for author in authors:
-        if await send_auction_message(author.telegram_id, lead):
-            answer = await wait_auction_answer(lead, author.telegram_id)
+        is_sent_success = await send_auction_message(author.telegram_id, lead)
+        if not is_sent_success:
+            logger.info(f"Не удалось отправить сообщение автору {author.custom_id} на участие в проекте {lead.id}")
+            continue
 
-            if answer == "closed":
-                logger.info(f"Менеджер віддав завдання {lead.id} іншому автору")
-                flag = True
-                await send_message(
-                    bot,
-                    author.telegram_id,
-                    f"Менеджер віддав завдання {lead.id} іншому автору",
-                    keyboard=types.ReplyKeyboardRemove(),
-                )
-                break
-            elif answer == "accept":
-                if author.open_leads is None:
-                    author.open_leads = 0
+        answer = await wait_auction_answer(lead, author.telegram_id)
 
-                open_leads = author.open_leads + 1
-                busyness = author.busyness + lead.koef
+        if answer == "accept":
+            if author.open_leads is None:
+                author.open_leads = 0
 
-                await update_author_busyness_and_open_leads(author.telegram_id, busyness, open_leads)
-                await Author.update_author_busyness_and_open_leads(author.id, busyness, open_leads)
-                await Lead.update_lead_author(lead.id, author.custom_id, author.name, author.admin_id)
-                await Lead.update_lead_status(lead.id, 53018611)
-                flag = True
+            open_leads = author.open_leads + 1
+            busyness = author.busyness + lead.koef
 
-                logger.info(f"Автор {author.telegram_id} становиться владельцем проекта: {lead.id}")
-                break
-            elif answer == "refuce":
-                logger.info(f"Автор {author.telegram_id} отказался от проекта: {lead.id}")
-            else:
-                logger.info(f"Автор {author.telegram_id} не отрегировал на проект: {lead.id}")
-                await send_message(
-                    bot,
-                    author.telegram_id,
-                    f"Термін прийому завдання {lead.id} завершився",
-                    keyboard=types.ReplyKeyboardRemove(),
-                )
+            await update_author_busyness_and_open_leads(author.telegram_id, busyness, open_leads)
+            await Author.update_author_busyness_and_open_leads(author.id, busyness, open_leads)
+            await Lead.update_lead_author(lead.id, author.custom_id, author.name, author.admin_id)
+            await Lead.update_lead_status(lead.id, 53018611)
+            is_auction_changed = True
 
-    return flag, lead
+            logger.info(f"Автор {author.telegram_id} становиться владельцем проекта: {lead.id}")
+            break
+
+        elif answer == "refuce":
+            logger.info(f"Автор {author.telegram_id} отказался от проекта: {lead.id}")
+
+        else:
+            logger.info(f"Автор {author.telegram_id} не отреагировал на проект: {lead.id}")
+            await send_message(
+                bot,
+                author.telegram_id,
+                f"Термін прийому завдання {lead.id} завершився",
+                keyboard=types.ReplyKeyboardRemove(),
+            )
+
+    logger.info(f"Публичная раздача проекта {lead.id} закончился")
+
+    return is_auction_changed, lead
