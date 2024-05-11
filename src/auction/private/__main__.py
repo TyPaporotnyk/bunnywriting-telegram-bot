@@ -45,6 +45,8 @@ async def main():
             await asyncio.sleep(3600)
             continue
 
+        await asyncio.sleep(3600)
+
 
 if __name__ == "__main__":
     logging.setup()
