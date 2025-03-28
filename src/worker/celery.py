@@ -12,7 +12,7 @@ app.conf.beat_schedule = {
     },
     "send-team-leads-alerts-task": {
         "task": "src.worker.tasks.send_team_leads_alerts_task",
-        "schedule": crontab(minute="0", hour="10"),
+        "schedule": crontab(minute="0", hour="12"),
     },
 }
 app.conf.beat_schedule_filename = "data/celerybeat-schedule"
